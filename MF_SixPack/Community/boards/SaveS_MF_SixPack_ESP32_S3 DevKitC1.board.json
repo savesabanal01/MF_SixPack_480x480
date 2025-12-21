@@ -10,31 +10,33 @@
     "ConnectionDelay": 1250,
     "DelayAfterFirmwareUpdate": 1250,
     "DtrEnable": true,
-    "EEPROMSize": 1496,
+    "EEPROMSize": 3000,
     "ExtraConnectionRetry": false,
     "ForceResetOnFirmwareUpdate": true,
     "MessageSize": 90
   },
   "HardwareIds": [
     "^VID_303A&PID_1001",
-    "^VID_303A\\+PID_1001\\+.+"
+    "^VID_303A\\+PID_1001\\+.+",
+    "^VID_1A86&PID_7523",
+    "^VID_1A86\\+PID_7523\\+.+"
   ],
   "Info": {
     "CanInstallFirmware": true,
     "CanResetBoard": true,
     "DelayAfterFirmwareUpdate": 0,
-    "FirmwareBaseName": "mobiflight_template_esp32s3",
+    "FirmwareBaseName": "saves_mf_sixpack_esp32s3",
     "FirmwareExtension": "bin",
-    "FriendlyName": "Template ESP32-S3 DevKitC1",
+    "FriendlyName": "MF_SixPack",
     "LatestFirmwareVersion": "2.5.1",
-    "MobiFlightType": "Mobiflight Template ESP32-S3 DevKitC1",
+    "MobiFlightType": "MF_SixPack",
     "ResetFirmwareFile": "reset.raspberry_pico_flash_nuke.uf2",
     "CustomDeviceTypes": [
-      "MOBIFLIGHT_TEMPLATE",
-      "MOBIFLIGHT_TEMPLATE2"
+      "MF_ASI",
+      "MF_VSI"
     ],
     "Community": {
-      "Project": "Your Project",
+      "Project": "MF_SixPack",
       "Website": "https://YourWebsite.com",
       "Docs": "https://YourWebsite.com",
       "Support": "https://YourWebsite.com"

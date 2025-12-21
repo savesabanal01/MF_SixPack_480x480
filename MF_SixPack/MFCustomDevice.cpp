@@ -8,6 +8,8 @@
 const char CustomDeviceConfig[] PROGMEM = {};
 #endif
 
+#include "4inchLCDConfig_Guition.h"
+
 extern MFEEPROM MFeeprom;
 
 /* **********************************************************************************
@@ -22,7 +24,7 @@ extern MFEEPROM MFeeprom;
     E.g. 6 pins are required, each pin could have two characters (two digits),
     each pins are delimited by "|" and the string is NULL terminated.
     -> (6 * 2) + 5 + 1 = 18 bytes is the maximum.
-    The custom type is "MyCustomClass", which means 14 characters plus NULL = 15
+    The custom type is "MF_SixPack", which means 14 characters plus NULL = 15
     The configuration is "myConfig", which means 8 characters plus NULL = 9
     The maximum characters to be expected is 18, so MEMLEN_STRING_BUFFER has to be at least 18
 ********************************************************************************** */
@@ -85,16 +87,16 @@ void MFCustomDevice::attach(uint16_t adrPin, uint16_t adrType, uint16_t adrConfi
         is used to store the type
     ********************************************************************************** */
     getStringFromMem(adrType, parameter, configFromFlash);
-    if (strcmp(parameter, "MOBIFLIGHT_TEMPLATE") == 0)
-        _customType = MY_CUSTOM_DEVICE_1;
-    if (strcmp(parameter, "MOBIFLIGHT_TEMPLATE2") == 0)
-        _customType = MY_CUSTOM_DEVICE_2;
+    if (strcmp(parameter, "MF_ASI") == 0)
+        _customType = MF_ASI_DEVICE;
+    else if (strcmp(parameter, "MF_VSI") == 0)
+        _customType = MF_VSI_DEVICE;
 
-    if (_customType == MY_CUSTOM_DEVICE_1) {
+    if (_customType == MF_ASI_DEVICE) {
         /* **********************************************************************************
             Check if the device fits into the device buffer
         ********************************************************************************** */
-        if (!FitInMemory(sizeof(MyCustomClass))) {
+        if (!FitInMemory(sizeof(MF_ASI))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("Custom Device does not fit in Memory"));
             return;
@@ -142,30 +144,29 @@ void MFCustomDevice::attach(uint16_t adrPin, uint16_t adrType, uint16_t adrConfi
         ********************************************************************************** */
         // In most cases you need only one of the following functions
         // depending on if the constuctor takes the variables or a separate function is required
-        _mydevice = new (allocateMemory(sizeof(MyCustomClass))) MyCustomClass(_pin1, _pin2);
-        _mydevice->attach(Parameter1, Parameter2);
+        _myASIdevice = new (allocateMemory(sizeof(MF_ASI))) MF_ASI(_pin1, _pin2);
+        _myASIdevice->attach(Parameter1, Parameter2);
         // if your custom device does not need a separate begin() function, delete the following
         // or this function could be called from the custom constructor or attach() function
-        _mydevice->begin();
+        _myASIdevice->begin();
         _initialized = true;
-    } else if (_customType == MY_CUSTOM_DEVICE_2) {
+    } else if (_customType == MF_VSI_DEVICE) {
         /* **********************************************************************************
             Check if the device fits into the device buffer
         ********************************************************************************** */
-        if (!FitInMemory(sizeof(MyCustomClass))) {
+        if (!FitInMemory(sizeof(MF_VSI))) {
             // Error Message to Connector
             cmdMessenger.sendCmd(kStatus, F("Custom Device does not fit in Memory"));
             return;
         }
-
         /* **********************************************************************************************
             Read the pins from the EEPROM or Flash, copy them into a buffer
             If you have set '"isI2C": true' in the device.json file, the first value is the I2C address
         ********************************************************************************************** */
         getStringFromMem(adrPin, parameter, configFromFlash);
         /* **********************************************************************************************
-            split the pins up into single pins, as the number of pins could be different between
-            multiple devices, it is done here
+            Split the pins up into single pins. As the number of pins could be different between
+            multiple devices, it is done here.
         ********************************************************************************************** */
         params = strtok_r(parameter, "|", &p);
         _pin1  = atoi(params);
@@ -177,10 +178,9 @@ void MFCustomDevice::attach(uint16_t adrPin, uint16_t adrType, uint16_t adrConfi
         /* **********************************************************************************
             Read the configuration from the EEPROM or Flash, copy it into a buffer.
         ********************************************************************************** */
-        // Don't use it until it's implemented in the Connector
-        //getStringFromMem(adrConfig, parameter, configFromFlash);
+        getStringFromMem(adrConfig, parameter, configFromFlash);
         /* **********************************************************************************
-            split the config up into single parameter. As the number of parameters could be
+            Split the config up into single parameter. As the number of parameters could be
             different between multiple devices, it is done here.
             This is just an example how to process the init string. Do NOT use
             "," or ";" as delimiter for multiple parameters but e.g. "|"
@@ -189,10 +189,12 @@ void MFCustomDevice::attach(uint16_t adrPin, uint16_t adrType, uint16_t adrConfi
         ********************************************************************************** */
         uint16_t Parameter1;
         char    *Parameter2;
-        params     = strtok_r(parameter, "|", &p);
-        Parameter1 = atoi(params);
-        params     = strtok_r(NULL, "|", &p);
-        Parameter2 = params;
+        if (parameter[0] != 0x00) {      // ESP32 crashes if params gets not set
+            params     = strtok_r(parameter, "|", &p);
+            Parameter1 = atoi(params);
+            params     = strtok_r(NULL, "|", &p);
+            Parameter2 = params;
+        }
 
         /* **********************************************************************************
             Next call the constructor of your custom device
@@ -200,13 +202,14 @@ void MFCustomDevice::attach(uint16_t adrPin, uint16_t adrType, uint16_t adrConfi
         ********************************************************************************** */
         // In most cases you need only one of the following functions
         // depending on if the constuctor takes the variables or a separate function is required
-        _mydevice = new (allocateMemory(sizeof(MyCustomClass))) MyCustomClass(_pin1, _pin2);
-        _mydevice->attach(Parameter1, Parameter2);
+        _myVSIdevice = new (allocateMemory(sizeof(MF_VSI))) MF_VSI(_pin1, _pin2);
+        _myVSIdevice->attach(Parameter1, Parameter2);
         // if your custom device does not need a separate begin() function, delete the following
         // or this function could be called from the custom constructor or attach() function
-        _mydevice->begin();
+        _myVSIdevice->begin();
         _initialized = true;
-    } else {
+    }
+    else {
         cmdMessenger.sendCmd(kStatus, F("Custom Device is not supported by this firmware version"));
     }
 }
@@ -219,10 +222,10 @@ void MFCustomDevice::attach(uint16_t adrPin, uint16_t adrType, uint16_t adrConfi
 void MFCustomDevice::detach()
 {
     _initialized = false;
-    if (_customType == MY_CUSTOM_DEVICE_1) {
-        _mydevice->detach();
-    } else if (_customType == MY_CUSTOM_DEVICE_2) {
-        _mydevice->detach();
+    if (_customType == MF_ASI_DEVICE) {
+        _myASIdevice->detach();
+    } else if (_customType == MF_VSI_DEVICE) {
+        _myVSIdevice->detach();
     }
 }
 
@@ -241,10 +244,10 @@ void MFCustomDevice::update()
     /* **********************************************************************************
         Do something if required
     ********************************************************************************** */
-    if (_customType == MY_CUSTOM_DEVICE_1) {
-        _mydevice->update();
-    } else if (_customType == MY_CUSTOM_DEVICE_2) {
-        _mydevice->update();
+    if (_customType == MF_ASI_DEVICE) {
+        _myASIdevice->update();
+    } else if (_customType == MF_VSI_DEVICE) {
+        _myVSIdevice->update();
     }
 }
 
@@ -257,9 +260,9 @@ void MFCustomDevice::set(int16_t messageID, char *setPoint)
 {
     if (!_initialized) return;
 
-    if (_customType == MY_CUSTOM_DEVICE_1) {
-        _mydevice->set(messageID, setPoint);
-    } else if (_customType == MY_CUSTOM_DEVICE_2) {
-        _mydevice->set(messageID, setPoint);
+    if (_customType == MF_ASI_DEVICE) {
+        _myASIdevice->set(messageID, setPoint);
+    } else if (_customType == MF_VSI_DEVICE) {
+        _myVSIdevice->set(messageID, setPoint);
     }
 }

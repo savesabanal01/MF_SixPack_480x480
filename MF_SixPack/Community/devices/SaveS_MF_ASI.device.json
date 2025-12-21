@@ -1,0 +1,31 @@
+{
+    "$schema": "./mfdevice.schema.json",
+    "Info": {
+      "Label": "MF_ASI",
+      "Type": "MF_ASI",
+      "Author": "SaveS",
+      "URL": "https://github.com",
+      "Version" : "1.0.0"
+    },
+    "Config": {
+      "Pins": [
+        "Pin 1",
+        "Pin 2",
+        "Pin 3"
+      ],
+      "isI2C": false
+    },
+    "MessageTypes": [
+      {
+        "id": 0,
+        "label": "Air Speed Value",
+        "description": "$ will be displayed as Air Speed value"
+      },
+      {
+        "id": 1,
+        "label": "TAS Knob Value",
+        "description": "$ will be displayed as True Airspeed (TAS) value"
+      }
+    ]
+  }
+  

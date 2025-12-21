@@ -1,0 +1,26 @@
+{
+    "$schema": "./mfdevice.schema.json",
+    "Info": {
+      "Label": "MF_VSI",
+      "Type": "MF_VSI",
+      "Author": "SaveS",
+      "URL": "https://github.com",
+      "Version" : "1.0.0"
+    },
+    "Config": {
+      "Pins": [
+        "Pin 1",
+        "Pin 2",
+        "Pin 3"
+      ],
+      "isI2C": false
+    },
+    "MessageTypes": [
+      {
+        "id": 0,
+        "label": "Vertical Speed Value",
+        "description": "$ will be displayed as Vertical Speed value"
+      }
+    ]
+  }
+  

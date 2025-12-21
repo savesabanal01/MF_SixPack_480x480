@@ -1,0 +1,149 @@
+#include "MF_VSI.h"
+#include "allocateMem.h"
+#include "commandmessenger.h"
+#include "4inchLCDConfig_Guition.h"
+
+static LGFX lcd;
+static LGFX_Sprite canvas(&lcd);
+static LGFX_Sprite mainGaugeSpr(&canvas);
+static LGFX_Sprite bezelSpr(&canvas);
+static LGFX_Sprite needleSpr(&canvas);
+// RunningAverage airSpeedAngleAvg(1);
+
+/* **********************************************************************************
+    This is just the basic code to set up your custom device.
+    Change/add your code as needed.
+********************************************************************************** */
+
+MF_VSI::MF_VSI(uint8_t Pin1, uint8_t Pin2)
+{
+    _pin1 = Pin1;
+    _pin2 = Pin2;
+}
+
+void MF_VSI::begin()
+{
+
+}
+
+void MF_VSI::attach(uint16_t Pin3, char *init)
+{
+    _pin3 = Pin3;
+    lcd.init();
+    lcd.setFont(&fonts::Font4);
+
+    lcd.setRotation(3);
+
+    lcd.fillScreen(TFT_GREEN);
+    lcd.setFont(&fonts::Font4);
+    delay(3000);
+    lcd.fillScreen(TFT_YELLOW);
+
+    canvas.createSprite(240, 480);
+    mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(VSI_Main_Gauge), VSI_MAIN_GAUGE_WIDTH, VSI_BEZEL_HEIGHT, 16);
+    bezelSpr.setBuffer(const_cast<std::uint16_t *>(VSI_Bezel), VSI_BEZEL_WIDTH, VSI_BEZEL_HEIGHT, 16);
+    needleSpr.setBuffer(const_cast<std::uint16_t *>(VSI_Needle), VSI_NEEDLE_WIDTH, VSI_NEEDLE_HEIGHT, 16);
+}
+
+void MF_VSI::detach()
+{
+    if (!_initialised)
+        return;
+    _initialised = false;
+    canvas.deleteSprite();
+    mainGaugeSpr.deleteSprite();
+    bezelSpr.deleteSprite();
+    needleSpr.deleteSprite();
+    lcd.endWrite();
+}
+
+void MF_VSI::set(int16_t messageID, char *setPoint)
+{
+    /* **********************************************************************************
+        Each messageID has it's own value
+        check for the messageID and define what to do.
+        Important Remark!
+        MessageID == -2 will be send from the board when PowerSavingMode is set
+            Message will be "0" for leaving and "1" for entering PowerSavingMode
+        MessageID == -1 will be send from the connector when Connector stops running
+        Put in your code to enter this mode (e.g. clear a display)
+
+    ********************************************************************************** */
+    // int32_t  data = atoi(setPoint);
+    // uint16_t output;
+
+    // do something according your messageID
+    switch (messageID) {
+    case -1:
+        // tbd., get's called when Mobiflight shuts down
+        break;
+    case -2:
+        // tbd., get's called when PowerSavingMode is entered
+        break;
+    case 0:
+        setVerticalSpeed(atof(setPoint));
+        break;
+    case 1:
+        /* code */
+        break;
+    case 2:
+        /* code */
+        break;
+    default:
+        break;
+    }
+    drawGauge();
+}
+
+void MF_VSI::update()
+{
+    // Do something which is required regulary
+}
+
+void MF_VSI::drawGauge()
+{
+    VSIAngle = scaleValue(verticalSpeed, -2000, 2000, -170, 170); // The needle starts at -90 degrees
+
+    canvas.fillScreen(TFT_BLACK);
+
+    drawLeftGauge();
+    drawRightGauge();
+}
+
+void MF_VSI::setVerticalSpeed(float value)
+{
+    verticalSpeed = value;
+}
+
+
+void MF_VSI::drawLeftGauge()
+{
+    // Draw Left Half of VSI Gauge
+
+    canvas.setPivot(240, 240);
+    needleSpr.setPivot(198, VSI_NEEDLE_HEIGHT / 2);
+    mainGaugeSpr.pushSprite(&canvas, 0, 0, TFT_BLUE);
+    needleSpr.pushRotated(&canvas, VSIAngle, TFT_BLUE);
+    bezelSpr.pushSprite(&canvas, 0, 0, TFT_BLUE);
+
+    canvas.pushSprite(&lcd, 0, 0);
+
+}
+
+void MF_VSI::drawRightGauge()
+{
+    // Draw right half
+    canvas.fillScreen(TFT_BLACK);
+    canvas.setPivot(240 - x_offset, 240);
+    needleSpr.setPivot(198, VSI_NEEDLE_HEIGHT / 2);
+    mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, TFT_BLUE);
+    needleSpr.pushRotated(&canvas, VSIAngle, TFT_BLUE);
+    bezelSpr.pushSprite(&canvas, -x_offset, 0, TFT_BLUE);
+    canvas.pushSprite(&lcd, x_offset, 0);
+}
+
+// Scale Function
+float MF_VSI::scaleValue(float x, float in_min, float in_max, float out_min, float out_max)
+{
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
