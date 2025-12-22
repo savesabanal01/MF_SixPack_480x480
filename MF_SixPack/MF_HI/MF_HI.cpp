@@ -1,13 +1,14 @@
-#include "MF_VSI.h"
+#include "MF_HI.h"
 #include "allocateMem.h"
 #include "commandmessenger.h"
 #include "4inchLCDConfig_Guition.h"
 
 static LGFX lcd;
 static LGFX_Sprite canvas(&lcd);
+static LGFX_Sprite headingTapeSpr(&canvas);
 static LGFX_Sprite mainGaugeSpr(&canvas);
-static LGFX_Sprite bezelSpr(&canvas);
 static LGFX_Sprite needleSpr(&canvas);
+static LGFX_Sprite bezelSpr(&canvas);
 // RunningAverage airSpeedAngleAvg(1);
 
 /* **********************************************************************************
@@ -15,18 +16,18 @@ static LGFX_Sprite needleSpr(&canvas);
     Change/add your code as needed.
 ********************************************************************************** */
 
-MF_VSI::MF_VSI(uint8_t Pin1, uint8_t Pin2)
+MF_HI::MF_HI(uint8_t Pin1, uint8_t Pin2)
 {
     _pin1 = Pin1;
     _pin2 = Pin2;
 }
 
-void MF_VSI::begin()
+void MF_HI::begin()
 {
 
 }
 
-void MF_VSI::attach(uint16_t Pin3, char *init)
+void MF_HI::attach(uint16_t Pin3, char *init)
 {
     _pin3 = Pin3;
     lcd.init();
@@ -40,12 +41,13 @@ void MF_VSI::attach(uint16_t Pin3, char *init)
     lcd.fillScreen(TFT_YELLOW);
 
     canvas.createSprite(240, 480);
-    mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(VSI_Main_Gauge), VSI_MAIN_GAUGE_WIDTH, VSI_MAIN_GAUGE_HEIGHT, 16);
-    bezelSpr.setBuffer(const_cast<std::uint16_t *>(VSI_Bezel), VSI_BEZEL_WIDTH, VSI_BEZEL_HEIGHT, 16);
-    needleSpr.setBuffer(const_cast<std::uint16_t *>(VSI_Needle), VSI_NEEDLE_WIDTH, VSI_NEEDLE_HEIGHT, 16);
+    mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(HI_Main_Gauge), HI_MAIN_GAUGE_WIDTH, HI_MAIN_GAUGE_HEIGHT, 16);
+    headingTapeSpr.setBuffer(const_cast<std::uint16_t *>(HI_Heading_Tape), HI_HEADING_TAPE_WIDTH, HI_HEADING_TAPE_HEIGHT, 16);
+    bezelSpr.setBuffer(const_cast<std::uint16_t *>(HI_Bezel), HI_BEZEL_WIDTH, HI_BEZEL_HEIGHT, 16);
+    needleSpr.setBuffer(const_cast<std::uint16_t *>(HI_Needle), HI_NEEDLE_WIDTH, HI_NEEDLE_HEIGHT, 16);
 }
 
-void MF_VSI::detach()
+void MF_HI::detach()
 {
     if (!_initialised)
         return;
@@ -54,10 +56,11 @@ void MF_VSI::detach()
     mainGaugeSpr.deleteSprite();
     bezelSpr.deleteSprite();
     needleSpr.deleteSprite();
+    headingTapeSpr.deleteSprite();
     lcd.endWrite();
 }
 
-void MF_VSI::set(int16_t messageID, char *setPoint)
+void MF_HI::set(int16_t messageID, char *setPoint)
 {
     /* **********************************************************************************
         Each messageID has it's own value
@@ -81,10 +84,11 @@ void MF_VSI::set(int16_t messageID, char *setPoint)
         // tbd., get's called when PowerSavingMode is entered
         break;
     case 0:
-        setVerticalSpeed(atof(setPoint));
+        setHeading(atof(setPoint));
         break;
     case 1:
         /* code */
+        setHeadingBug(atof(setPoint));
         break;
     case 2:
         /* code */
@@ -95,14 +99,14 @@ void MF_VSI::set(int16_t messageID, char *setPoint)
     drawGauge();
 }
 
-void MF_VSI::update()
+void MF_HI::update()
 {
     // Do something which is required regulary
 }
 
-void MF_VSI::drawGauge()
+void MF_HI::drawGauge()
 {
-    VSIAngle = scaleValue(verticalSpeed, -2000, 2000, -170, 170); // The needle starts at -90 degrees
+    // VSIAngle = scaleValue(verticalSpeed, -2000, 2000, -170, 170); // The needle starts at -90 degrees
 
     canvas.fillScreen(TFT_BLACK);
 
@@ -110,40 +114,50 @@ void MF_VSI::drawGauge()
     drawRightGauge();
 }
 
-void MF_VSI::setVerticalSpeed(float value)
+void MF_HI::setHeading(float value)
 {
-    verticalSpeed = value;
+    heading = value;
+}
+
+void MF_HI::setHeadingBug(float value)
+{
+    headingBug = value;
 }
 
 
-void MF_VSI::drawLeftGauge()
+void MF_HI::drawLeftGauge()
 {
     // Draw Left Half of VSI Gauge
 
+    canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240, 240);
-    needleSpr.setPivot(198, VSI_NEEDLE_HEIGHT / 2);
-    mainGaugeSpr.pushSprite(&canvas, 0, 0, TFT_BLUE);
-    needleSpr.pushRotated(&canvas, VSIAngle, TFT_BLUE);
-    bezelSpr.pushSprite(&canvas, 0, 0, TFT_BLUE);
 
+    headingTapeSpr.setPivot(240, 240);
+    headingTapeSpr.pushRotated(&canvas, heading, TFT_BLUE);
+    mainGaugeSpr.pushSprite(&canvas, 90, 90, TFT_BLUE);
+    needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 235);
+    needleSpr.pushRotated(&canvas, headingBug, TFT_BLUE);
+    bezelSpr.pushSprite(&canvas, 0, 0, TFT_BLUE);
     canvas.pushSprite(&lcd, 0, 0);
 
 }
 
-void MF_VSI::drawRightGauge()
+void MF_HI::drawRightGauge()
 {
     // Draw right half
     canvas.fillScreen(TFT_BLACK);
+    headingTapeSpr.setPivot(240, 240);
     canvas.setPivot(240 - x_offset, 240);
-    needleSpr.setPivot(198, VSI_NEEDLE_HEIGHT / 2);
-    mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, TFT_BLUE);
-    needleSpr.pushRotated(&canvas, VSIAngle, TFT_BLUE);
+    headingTapeSpr.pushRotated(&canvas, heading, TFT_BLUE);
+    mainGaugeSpr.pushSprite(&canvas, 90 - x_offset, 90, TFT_BLUE);
+    needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 235);
+    needleSpr.pushRotated(&canvas, headingBug, TFT_BLUE);
     bezelSpr.pushSprite(&canvas, -x_offset, 0, TFT_BLUE);
     canvas.pushSprite(&lcd, x_offset, 0);
 }
 
 // Scale Function
-float MF_VSI::scaleValue(float x, float in_min, float in_max, float out_min, float out_max)
+float MF_HI::scaleValue(float x, float in_min, float in_max, float out_min, float out_max)
 {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }

@@ -89,8 +89,14 @@ void MFCustomDevice::attach(uint16_t adrPin, uint16_t adrType, uint16_t adrConfi
     getStringFromMem(adrType, parameter, configFromFlash);
     if (strcmp(parameter, "MF_ASI") == 0)
         _customType = MF_ASI_DEVICE;
-    else if (strcmp(parameter, "MF_VSI") == 0)
+    if (strcmp(parameter, "MF_VSI") == 0)
         _customType = MF_VSI_DEVICE;
+    if (strcmp(parameter, "MF_HI") == 0)
+        _customType = MF_HI_DEVICE;
+    if (strcmp(parameter, "MF_TC") == 0)
+        _customType = MF_TC_DEVICE;
+    if (strcmp(parameter, "MF_ALT") == 0)
+        _customType = MF_ALT_DEVICE;
 
     if (_customType == MF_ASI_DEVICE) {
         /* **********************************************************************************
@@ -150,7 +156,7 @@ void MFCustomDevice::attach(uint16_t adrPin, uint16_t adrType, uint16_t adrConfi
         // or this function could be called from the custom constructor or attach() function
         _myASIdevice->begin();
         _initialized = true;
-    } else if (_customType == MF_VSI_DEVICE) {
+    }  else if (_customType == MF_VSI_DEVICE) {
         /* **********************************************************************************
             Check if the device fits into the device buffer
         ********************************************************************************** */
@@ -208,6 +214,180 @@ void MFCustomDevice::attach(uint16_t adrPin, uint16_t adrType, uint16_t adrConfi
         // or this function could be called from the custom constructor or attach() function
         _myVSIdevice->begin();
         _initialized = true;
+    } else if (_customType == MF_HI_DEVICE) {
+        /* **********************************************************************************
+            Check if the device fits into the device buffer
+        ********************************************************************************** */
+        if (!FitInMemory(sizeof(MF_HI))) {
+            // Error Message to Connector
+            cmdMessenger.sendCmd(kStatus, F("Custom Device does not fit in Memory"));
+            return;
+        }
+        /* **********************************************************************************************
+            Read the pins from the EEPROM or Flash, copy them into a buffer
+            If you have set '"isI2C": true' in the device.json file, the first value is the I2C address
+        ********************************************************************************************** */
+        getStringFromMem(adrPin, parameter, configFromFlash);
+        /* **********************************************************************************************
+            Split the pins up into single pins. As the number of pins could be different between
+            multiple devices, it is done here.
+        ********************************************************************************************** */
+        params = strtok_r(parameter, "|", &p);
+        _pin1  = atoi(params);
+        params = strtok_r(NULL, "|", &p);
+        _pin2  = atoi(params);
+        params = strtok_r(NULL, "|", &p);
+        _pin3  = atoi(params);
+
+        /* **********************************************************************************
+            Read the configuration from the EEPROM or Flash, copy it into a buffer.
+        ********************************************************************************** */
+        getStringFromMem(adrConfig, parameter, configFromFlash);
+        /* **********************************************************************************
+            Split the config up into single parameter. As the number of parameters could be
+            different between multiple devices, it is done here.
+            This is just an example how to process the init string. Do NOT use
+            "," or ";" as delimiter for multiple parameters but e.g. "|"
+            For most customer devices it is not required.
+            In this case just delete the following
+        ********************************************************************************** */
+        uint16_t Parameter1;
+        char    *Parameter2;
+        if (parameter[0] != 0x00) {      // ESP32 crashes if params gets not set
+            params     = strtok_r(parameter, "|", &p);
+            Parameter1 = atoi(params);
+            params     = strtok_r(NULL, "|", &p);
+            Parameter2 = params;
+        }
+
+        /* **********************************************************************************
+            Next call the constructor of your custom device
+            adapt it to the needs of your constructor
+        ********************************************************************************** */
+        // In most cases you need only one of the following functions
+        // depending on if the constuctor takes the variables or a separate function is required
+        _myHIdevice = new (allocateMemory(sizeof(MF_HI))) MF_HI(_pin1, _pin2);
+        _myHIdevice->attach(Parameter1, Parameter2);
+        // if your custom device does not need a separate begin() function, delete the following
+        // or this function could be called from the custom constructor or attach() function
+        _myHIdevice->begin();
+        _initialized = true;
+    }  else if (_customType == MF_TC_DEVICE) {
+        /* **********************************************************************************
+            Check if the device fits into the device buffer
+        ********************************************************************************** */
+        if (!FitInMemory(sizeof(MF_TC))) {
+            // Error Message to Connector
+            cmdMessenger.sendCmd(kStatus, F("Custom Device does not fit in Memory"));
+            return;
+        }
+        /* **********************************************************************************************
+            Read the pins from the EEPROM or Flash, copy them into a buffer
+            If you have set '"isI2C": true' in the device.json file, the first value is the I2C address
+        ********************************************************************************************** */
+        getStringFromMem(adrPin, parameter, configFromFlash);
+        /* **********************************************************************************************
+            Split the pins up into single pins. As the number of pins could be different between
+            multiple devices, it is done here.
+        ********************************************************************************************** */
+        params = strtok_r(parameter, "|", &p);
+        _pin1  = atoi(params);
+        params = strtok_r(NULL, "|", &p);
+        _pin2  = atoi(params);
+        params = strtok_r(NULL, "|", &p);
+        _pin3  = atoi(params);
+
+        /* **********************************************************************************
+            Read the configuration from the EEPROM or Flash, copy it into a buffer.
+        ********************************************************************************** */
+        getStringFromMem(adrConfig, parameter, configFromFlash);
+        /* **********************************************************************************
+            Split the config up into single parameter. As the number of parameters could be
+            different between multiple devices, it is done here.
+            This is just an example how to process the init string. Do NOT use
+            "," or ";" as delimiter for multiple parameters but e.g. "|"
+            For most customer devices it is not required.
+            In this case just delete the following
+        ********************************************************************************** */
+        uint16_t Parameter1;
+        char    *Parameter2;
+        if (parameter[0] != 0x00) {      // ESP32 crashes if params gets not set
+            params     = strtok_r(parameter, "|", &p);
+            Parameter1 = atoi(params);
+            params     = strtok_r(NULL, "|", &p);
+            Parameter2 = params;
+        }
+
+        /* **********************************************************************************
+            Next call the constructor of your custom device
+            adapt it to the needs of your constructor
+        ********************************************************************************** */
+        // In most cases you need only one of the following functions
+        // depending on if the constuctor takes the variables or a separate function is required
+        _myTCdevice = new (allocateMemory(sizeof(MF_TC))) MF_TC(_pin1, _pin2);
+        _myTCdevice->attach(Parameter1, Parameter2);
+        // if your custom device does not need a separate begin() function, delete the following
+        // or this function could be called from the custom constructor or attach() function
+        _myTCdevice->begin();
+        _initialized = true;
+    }  else if (_customType == MF_ALT_DEVICE) {
+        /* **********************************************************************************
+            Check if the device fits into the device buffer
+        ********************************************************************************** */
+        if (!FitInMemory(sizeof(MF_ALT))) {
+            // Error Message to Connector
+            cmdMessenger.sendCmd(kStatus, F("Custom Device does not fit in Memory"));
+            return;
+        }
+        /* **********************************************************************************************
+            Read the pins from the EEPROM or Flash, copy them into a buffer
+            If you have set '"isI2C": true' in the device.json file, the first value is the I2C address
+        ********************************************************************************************** */
+        getStringFromMem(adrPin, parameter, configFromFlash);
+        /* **********************************************************************************************
+            Split the pins up into single pins. As the number of pins could be different between
+            multiple devices, it is done here.
+        ********************************************************************************************** */
+        params = strtok_r(parameter, "|", &p);
+        _pin1  = atoi(params);
+        params = strtok_r(NULL, "|", &p);
+        _pin2  = atoi(params);
+        params = strtok_r(NULL, "|", &p);
+        _pin3  = atoi(params);
+
+        /* **********************************************************************************
+            Read the configuration from the EEPROM or Flash, copy it into a buffer.
+        ********************************************************************************** */
+        getStringFromMem(adrConfig, parameter, configFromFlash);
+        /* **********************************************************************************
+            Split the config up into single parameter. As the number of parameters could be
+            different between multiple devices, it is done here.
+            This is just an example how to process the init string. Do NOT use
+            "," or ";" as delimiter for multiple parameters but e.g. "|"
+            For most customer devices it is not required.
+            In this case just delete the following
+        ********************************************************************************** */
+        uint16_t Parameter1;
+        char    *Parameter2;
+        if (parameter[0] != 0x00) {      // ESP32 crashes if params gets not set
+            params     = strtok_r(parameter, "|", &p);
+            Parameter1 = atoi(params);
+            params     = strtok_r(NULL, "|", &p);
+            Parameter2 = params;
+        }
+
+        /* **********************************************************************************
+            Next call the constructor of your custom device
+            adapt it to the needs of your constructor
+        ********************************************************************************** */
+        // In most cases you need only one of the following functions
+        // depending on if the constuctor takes the variables or a separate function is required
+        _myALTdevice = new (allocateMemory(sizeof(MF_ALT))) MF_ALT(_pin1, _pin2);
+        _myALTdevice->attach(Parameter1, Parameter2);
+        // if your custom device does not need a separate begin() function, delete the following
+        // or this function could be called from the custom constructor or attach() function
+        _myALTdevice->begin();
+        _initialized = true;
     }
     else {
         cmdMessenger.sendCmd(kStatus, F("Custom Device is not supported by this firmware version"));
@@ -226,6 +406,12 @@ void MFCustomDevice::detach()
         _myASIdevice->detach();
     } else if (_customType == MF_VSI_DEVICE) {
         _myVSIdevice->detach();
+    } else if (_customType == MF_HI_DEVICE) {
+        _myHIdevice->detach();
+    } else if (_customType == MF_TC_DEVICE) {
+        _myTCdevice->detach();
+    } else if (_customType == MF_ALT_DEVICE) {
+        _myALTdevice->detach();
     }
 }
 
@@ -248,6 +434,12 @@ void MFCustomDevice::update()
         _myASIdevice->update();
     } else if (_customType == MF_VSI_DEVICE) {
         _myVSIdevice->update();
+    } else if (_customType == MF_HI_DEVICE) {
+        _myHIdevice->update();
+    } else if (_customType == MF_TC_DEVICE) {
+        _myTCdevice->update();
+    }  else if (_customType == MF_ALT_DEVICE) {
+        _myALTdevice->update();
     }
 }
 
@@ -264,5 +456,11 @@ void MFCustomDevice::set(int16_t messageID, char *setPoint)
         _myASIdevice->set(messageID, setPoint);
     } else if (_customType == MF_VSI_DEVICE) {
         _myVSIdevice->set(messageID, setPoint);
+    } else if (_customType == MF_HI_DEVICE) {
+        _myHIdevice->set(messageID, setPoint);
+    } else if (_customType == MF_TC_DEVICE) {
+        _myTCdevice->set(messageID, setPoint);
+    } else if (_customType == MF_ALT_DEVICE) {
+        _myALTdevice->set(messageID, setPoint);
     }
 }
