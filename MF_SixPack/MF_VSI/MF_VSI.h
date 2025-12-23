@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Arduino.h>
-#include "include/VSI_Bezel.h"
 #include "include/VSI_Main_Gauge.h"
 #include "include/VSI_Needle.h"
 

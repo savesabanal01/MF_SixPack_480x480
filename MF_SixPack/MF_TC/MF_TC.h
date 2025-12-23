@@ -2,7 +2,6 @@
 
 #include <Arduino.h>
 #include "include/TC_Ball.h"
-#include "include/TC_Bezel.h"
 #include "include/TC_Main_Gauge.h"
 #include "include/TC_Marker.h"
 #include "include/TC_Plane.h"

@@ -388,7 +388,7 @@ void MFCustomDevice::attach(uint16_t adrPin, uint16_t adrType, uint16_t adrConfi
         // or this function could be called from the custom constructor or attach() function
         _myALTdevice->begin();
         _initialized = true;
-    }
+    } 
     else {
         cmdMessenger.sendCmd(kStatus, F("Custom Device is not supported by this firmware version"));
     }
@@ -438,7 +438,7 @@ void MFCustomDevice::update()
         _myHIdevice->update();
     } else if (_customType == MF_TC_DEVICE) {
         _myTCdevice->update();
-    }  else if (_customType == MF_ALT_DEVICE) {
+    } else if (_customType == MF_ALT_DEVICE) {
         _myALTdevice->update();
     }
 }
@@ -462,5 +462,5 @@ void MFCustomDevice::set(int16_t messageID, char *setPoint)
         _myTCdevice->set(messageID, setPoint);
     } else if (_customType == MF_ALT_DEVICE) {
         _myALTdevice->set(messageID, setPoint);
-    }
+    } 
 }

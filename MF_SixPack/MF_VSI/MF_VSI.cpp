@@ -2,6 +2,9 @@
 #include "allocateMem.h"
 #include "commandmessenger.h"
 #include "4inchLCDConfig_Guition.h"
+#include "Common_Bezel.h"
+
+#define BACKGROUND_COLOR  0x1041
 
 static LGFX lcd;
 static LGFX_Sprite canvas(&lcd);
@@ -41,7 +44,7 @@ void MF_VSI::attach(uint16_t Pin3, char *init)
 
     canvas.createSprite(240, 480);
     mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(VSI_Main_Gauge), VSI_MAIN_GAUGE_WIDTH, VSI_MAIN_GAUGE_HEIGHT, 16);
-    bezelSpr.setBuffer(const_cast<std::uint16_t *>(VSI_Bezel), VSI_BEZEL_WIDTH, VSI_BEZEL_HEIGHT, 16);
+    bezelSpr.setBuffer(const_cast<std::uint16_t *>(Common_Bezel), COMMON_BEZEL_WIDTH, COMMON_BEZEL_HEIGHT, 16);
     needleSpr.setBuffer(const_cast<std::uint16_t *>(VSI_Needle), VSI_NEEDLE_WIDTH, VSI_NEEDLE_HEIGHT, 16);
 }
 
@@ -122,9 +125,9 @@ void MF_VSI::drawLeftGauge()
 
     canvas.setPivot(240, 240);
     needleSpr.setPivot(198, VSI_NEEDLE_HEIGHT / 2);
-    mainGaugeSpr.pushSprite(&canvas, 0, 0, TFT_BLUE);
-    needleSpr.pushRotated(&canvas, VSIAngle, TFT_BLUE);
-    bezelSpr.pushSprite(&canvas, 0, 0, TFT_BLUE);
+    mainGaugeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
+    needleSpr.pushRotated(&canvas, VSIAngle, BACKGROUND_COLOR);
+    bezelSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
 
     canvas.pushSprite(&lcd, 0, 0);
 
@@ -136,9 +139,9 @@ void MF_VSI::drawRightGauge()
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240 - x_offset, 240);
     needleSpr.setPivot(198, VSI_NEEDLE_HEIGHT / 2);
-    mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, TFT_BLUE);
-    needleSpr.pushRotated(&canvas, VSIAngle, TFT_BLUE);
-    bezelSpr.pushSprite(&canvas, -x_offset, 0, TFT_BLUE);
+    mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
+    needleSpr.pushRotated(&canvas, VSIAngle, BACKGROUND_COLOR);
+    bezelSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, x_offset, 0);
 }
 

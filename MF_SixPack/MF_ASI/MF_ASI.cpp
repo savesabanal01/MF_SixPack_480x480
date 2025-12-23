@@ -10,6 +10,8 @@ static LGFX_Sprite numberTapeSpr(&canvas);
 static LGFX_Sprite labelsSpr(&canvas);
 static LGFX_Sprite needleSpr(&canvas);
 
+#define BACKGROUND_COLOR  0x1041
+
 // RunningAverage airSpeedAngleAvg(1);
 
 /* **********************************************************************************
@@ -39,7 +41,7 @@ void MF_ASI::attach(uint16_t Pin3, char *init)
     lcd.fillScreen(TFT_RED);
     lcd.setFont(&fonts::Font4);
     delay(3000);
-    lcd.fillScreen(TFT_BLUE);
+    lcd.fillScreen(BACKGROUND_COLOR);
 
     canvas.createSprite(240, 480);
     mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(ASI_Main_Gauge), ASI_MAIN_GAUGE_WIDTH, ASI_MAIN_GAUGE_HEIGHT, 16);
@@ -149,10 +151,10 @@ void MF_ASI::drawLeftGauge()
     needleSpr.setPivot(ASI_NEEDLE_WIDTH / 2, 240);
 
     // Draw left half
-    numberTapeSpr.pushSprite(&canvas, 0, 0, TFT_BLUE);
+    numberTapeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
     numberTapeSpr.setPivot(240, 240);
-    numberTapeSpr.pushRotated(&canvas, TASangle, TFT_BLUE);
-    mainGaugeSpr.pushSprite(&canvas, 0, 0, TFT_BLUE);
+    numberTapeSpr.pushRotated(&canvas, TASangle, BACKGROUND_COLOR);
+    mainGaugeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
 
     // Draw White Arc
 
@@ -168,10 +170,10 @@ void MF_ASI::drawLeftGauge()
     canvas.fillArc(240, 240, 240, 169, V_NEArcStartAngle - 90, V_NEArcEndAngle - 90, TFT_RED);
 
     // Draw the labels
-    labelsSpr.pushSprite(&canvas, 0, 0, TFT_BLACK);
+    labelsSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
 
     // Finally, draw the needle
-    needleSpr.pushRotated(&canvas, angle, TFT_BLUE);
+    needleSpr.pushRotated(&canvas, angle, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, 0, 0);
 }
 
@@ -181,8 +183,8 @@ void MF_ASI::drawRightGauge()
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240 - x_offset, 240);
     needleSpr.setPivot(ASI_NEEDLE_WIDTH / 2, 240);
-    numberTapeSpr.pushRotated(&canvas, TASangle, TFT_BLUE);
-    mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, TFT_BLUE);
+    numberTapeSpr.pushRotated(&canvas, TASangle, BACKGROUND_COLOR);
+    mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
 
     // Draw White Arc
     canvas.fillArc(0, 240, 214, 195, whiteArcStartAngle - 90, whiteArcEndAngle - 90, TFT_WHITE);
@@ -193,9 +195,9 @@ void MF_ASI::drawRightGauge()
     // Draw Red Arc for VNE
     canvas.fillArc(0, 240, 240, 169, V_NEArcStartAngle - 90, V_NEArcEndAngle - 90, TFT_RED);
     // Draw the labels
-    labelsSpr.pushSprite(&canvas, -x_offset, 0, TFT_BLACK);
+    labelsSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
     // Finally, draw the needle
-    needleSpr.pushRotated(&canvas, angle, TFT_BLUE);
+    needleSpr.pushRotated(&canvas, angle, BACKGROUND_COLOR);
 
     // Push the canvas sprite to the lcd screen
     canvas.pushSprite(&lcd, x_offset, 0);

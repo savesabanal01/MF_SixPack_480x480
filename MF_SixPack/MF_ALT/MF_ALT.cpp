@@ -3,6 +3,8 @@
 #include "commandmessenger.h"
 #include "4inchLCDConfig_Guition.h"
 
+#define BACKGROUND_COLOR  0x1041
+
 static LGFX lcd;
 static LGFX_Sprite canvas(&lcd);
 static LGFX_Sprite mainGaugeSpr(&canvas);
@@ -147,18 +149,18 @@ void MF_ALT::drawLeftGauge()
     baroSpr.setPivot(240, 240);
     baroSpr.pushRotated(&canvas, baroAngle);
 
-    mainGaugeSpr.pushSprite(&canvas, 0, 0, TFT_BLUE);
+    mainGaugeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
 
     needle10000Spr.setPivot(ALT_NEEDLE_10000_WIDTH / 2, 233);
-    needle10000Spr.pushRotated(&canvas, needle10000Angle, TFT_BLUE);
+    needle10000Spr.pushRotated(&canvas, needle10000Angle, BACKGROUND_COLOR);
 
     needle1000Spr.setPivot(ALT_NEEDLE_1000_WIDTH / 2, 133);
-    needle1000Spr.pushRotated(&canvas, needle1000Angle, TFT_BLUE);
+    needle1000Spr.pushRotated(&canvas, needle1000Angle, BACKGROUND_COLOR);
 
     needle100Spr.setPivot(ALT_NEEDLE_100_WIDTH / 2, 221);
-    needle100Spr.pushRotated(&canvas, needle100Angle, TFT_BLUE);
+    needle100Spr.pushRotated(&canvas, needle100Angle, BACKGROUND_COLOR);
 
-    bezelSpr.pushSprite(&canvas, 0, 0, TFT_BLUE);
+    bezelSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
 
     canvas.pushSprite(&lcd, 0, 0);
 
@@ -172,18 +174,18 @@ void MF_ALT::drawRightGauge()
     baroSpr.setPivot(240, 240);
     baroSpr.pushRotated(&canvas, baroAngle);
 
-    mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, TFT_BLUE);
+    mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
 
     needle10000Spr.setPivot(ALT_NEEDLE_10000_WIDTH / 2, 233);
-    needle10000Spr.pushRotated(&canvas, needle10000Angle, TFT_BLUE);
+    needle10000Spr.pushRotated(&canvas, needle10000Angle, BACKGROUND_COLOR);
 
     needle1000Spr.setPivot(ALT_NEEDLE_1000_WIDTH / 2, 133);
-    needle1000Spr.pushRotated(&canvas, needle1000Angle, TFT_BLUE);
+    needle1000Spr.pushRotated(&canvas, needle1000Angle, BACKGROUND_COLOR);
 
     needle100Spr.setPivot(ALT_NEEDLE_100_WIDTH / 2, 221);
-    needle100Spr.pushRotated(&canvas, needle100Angle, TFT_BLUE);
+    needle100Spr.pushRotated(&canvas, needle100Angle, BACKGROUND_COLOR);
 
-    bezelSpr.pushSprite(&canvas, -x_offset, 0, TFT_BLUE);
+    bezelSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
 
     canvas.pushSprite(&lcd, x_offset, 0);
 }

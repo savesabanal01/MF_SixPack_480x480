@@ -2,6 +2,9 @@
 #include "allocateMem.h"
 #include "commandmessenger.h"
 #include "4inchLCDConfig_Guition.h"
+#include "Common_Bezel.h"
+
+#define BACKGROUND_COLOR  0x1041
 
 static LGFX lcd;
 static LGFX_Sprite canvas(&lcd);
@@ -43,7 +46,7 @@ void MF_TC::attach(uint16_t Pin3, char *init)
 
     canvas.createSprite(240, 480);
     mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(TC_Main_Gauge), TC_MAIN_GAUGE_WIDTH, TC_MAIN_GAUGE_HEIGHT, 16);
-    bezelSpr.setBuffer(const_cast<std::uint16_t *>(TC_Bezel), TC_BEZEL_WIDTH, TC_BEZEL_HEIGHT, 16);
+    bezelSpr.setBuffer(const_cast<std::uint16_t *>(Common_Bezel), COMMON_BEZEL_WIDTH, COMMON_BEZEL_HEIGHT, 16);
     planeSpr.setBuffer(const_cast<std::uint16_t *>(TC_Plane), TC_PLANE_WIDTH, TC_PLANE_HEIGHT, 16);
     ballSpr.setBuffer(const_cast<std::uint16_t *>(TC_Ball), TC_BALL_WIDTH, TC_BALL_HEIGHT, 16);
     markerSpr.setBuffer(const_cast<std::uint16_t *>(TC_Marker), TC_MARKER_WIDTH, TC_MARKER_HEIGHT, 16);
@@ -137,12 +140,12 @@ void MF_TC::drawLeftGauge()
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240, 256);
 
-    mainGaugeSpr.pushSprite(&canvas, 0, 0, TFT_BLACK);
+    mainGaugeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
     planeSpr.setPivot(TC_PLANE_WIDTH / 2, 56);
-    planeSpr.pushRotated(&canvas, turnAngle, TFT_BLUE);
-    ballSpr.pushSprite(&canvas, ballXPos, ballYPos, TFT_BLUE);
-    markerSpr.pushSprite(&canvas, 208, 312, TFT_BLUE);
-    bezelSpr.pushSprite(&canvas, 0, 0, TFT_BLUE);
+    planeSpr.pushRotated(&canvas, turnAngle, BACKGROUND_COLOR);
+    ballSpr.pushSprite(&canvas, ballXPos, ballYPos, BACKGROUND_COLOR);
+    markerSpr.pushSprite(&canvas, 208, 313, BACKGROUND_COLOR);
+    bezelSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, 0, 0);
 
 }
@@ -152,12 +155,12 @@ void MF_TC::drawRightGauge()
     // Draw right half
   canvas.fillScreen(TFT_BLACK);
   canvas.setPivot(240 - x_offset, 256);
-  mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, TFT_BLUE);
+  mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
   planeSpr.setPivot(TC_PLANE_WIDTH / 2, 56);
-  planeSpr.pushRotated(&canvas, (int)round(turnAngle), TFT_BLUE);
-  ballSpr.pushSprite(&canvas, ballXPos - x_offset, ballYPos, TFT_BLUE);
-  markerSpr.pushSprite(&canvas, 208 - x_offset, 312, TFT_BLUE);
-  bezelSpr.pushSprite(&canvas, -x_offset, 0, TFT_BLUE);
+  planeSpr.pushRotated(&canvas, (int)round(turnAngle), BACKGROUND_COLOR);
+  ballSpr.pushSprite(&canvas, ballXPos - x_offset, ballYPos, BACKGROUND_COLOR);
+  markerSpr.pushSprite(&canvas, 208 - x_offset, 313, BACKGROUND_COLOR);
+  bezelSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
   canvas.pushSprite(&lcd, x_offset, 0);
 }
 

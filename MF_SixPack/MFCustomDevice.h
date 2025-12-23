@@ -31,7 +31,7 @@ private:
     MF_VSI         *_myVSIdevice;
     MF_HI          *_myHIdevice;
     MF_TC          *_myTCdevice;
-    MF_ALT          *_myALTdevice;
+    MF_ALT         *_myALTdevice;
     uint8_t        _pin1, _pin2, _pin3;
     uint8_t        _customType = 0;
 };

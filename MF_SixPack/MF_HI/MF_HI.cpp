@@ -2,6 +2,9 @@
 #include "allocateMem.h"
 #include "commandmessenger.h"
 #include "4inchLCDConfig_Guition.h"
+#include "Common_Bezel.h"
+
+#define BACKGROUND_COLOR  0x1041
 
 static LGFX lcd;
 static LGFX_Sprite canvas(&lcd);
@@ -43,7 +46,7 @@ void MF_HI::attach(uint16_t Pin3, char *init)
     canvas.createSprite(240, 480);
     mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(HI_Main_Gauge), HI_MAIN_GAUGE_WIDTH, HI_MAIN_GAUGE_HEIGHT, 16);
     headingTapeSpr.setBuffer(const_cast<std::uint16_t *>(HI_Heading_Tape), HI_HEADING_TAPE_WIDTH, HI_HEADING_TAPE_HEIGHT, 16);
-    bezelSpr.setBuffer(const_cast<std::uint16_t *>(HI_Bezel), HI_BEZEL_WIDTH, HI_BEZEL_HEIGHT, 16);
+    bezelSpr.setBuffer(const_cast<std::uint16_t *>(Common_Bezel), COMMON_BEZEL_WIDTH, COMMON_BEZEL_HEIGHT, 16);
     needleSpr.setBuffer(const_cast<std::uint16_t *>(HI_Needle), HI_NEEDLE_WIDTH, HI_NEEDLE_HEIGHT, 16);
 }
 
@@ -133,11 +136,11 @@ void MF_HI::drawLeftGauge()
     canvas.setPivot(240, 240);
 
     headingTapeSpr.setPivot(240, 240);
-    headingTapeSpr.pushRotated(&canvas, heading, TFT_BLUE);
-    mainGaugeSpr.pushSprite(&canvas, 90, 90, TFT_BLUE);
+    headingTapeSpr.pushRotated(&canvas, heading, BACKGROUND_COLOR);
+    mainGaugeSpr.pushSprite(&canvas, 90, 90, BACKGROUND_COLOR);
     needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 235);
-    needleSpr.pushRotated(&canvas, headingBug, TFT_BLUE);
-    bezelSpr.pushSprite(&canvas, 0, 0, TFT_BLUE);
+    needleSpr.pushRotated(&canvas, headingBug, BACKGROUND_COLOR);
+    bezelSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, 0, 0);
 
 }
@@ -148,11 +151,11 @@ void MF_HI::drawRightGauge()
     canvas.fillScreen(TFT_BLACK);
     headingTapeSpr.setPivot(240, 240);
     canvas.setPivot(240 - x_offset, 240);
-    headingTapeSpr.pushRotated(&canvas, heading, TFT_BLUE);
-    mainGaugeSpr.pushSprite(&canvas, 90 - x_offset, 90, TFT_BLUE);
+    headingTapeSpr.pushRotated(&canvas, heading, BACKGROUND_COLOR);
+    mainGaugeSpr.pushSprite(&canvas, 90 - x_offset, 90, BACKGROUND_COLOR);
     needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 235);
-    needleSpr.pushRotated(&canvas, headingBug, TFT_BLUE);
-    bezelSpr.pushSprite(&canvas, -x_offset, 0, TFT_BLUE);
+    needleSpr.pushRotated(&canvas, headingBug, BACKGROUND_COLOR);
+    bezelSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, x_offset, 0);
 }
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Arduino.h>
-#include "include/HI_Bezel.h"
 #include "include/HI_Heading_Tape.h"
 #include "include/HI_Main_Gauge.h"
 #include "include/HI_Needle.h"
