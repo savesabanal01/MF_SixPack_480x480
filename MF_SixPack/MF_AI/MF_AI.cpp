@@ -1,17 +1,17 @@
-#include "MF_HI.h"
+#include "MF_AI.h"
 #include "allocateMem.h"
 #include "commandmessenger.h"
 #include "4inchLCDConfig_Guition.h"
-#include "Common_Bezel.h"
 
 #define BACKGROUND_COLOR  0x1041
+#define SKYBLUE 0x5DDC
 
 static LGFX lcd;
 static LGFX_Sprite canvas(&lcd);
-static LGFX_Sprite headingTapeSpr(&canvas);
 static LGFX_Sprite mainGaugeSpr(&canvas);
-static LGFX_Sprite needleSpr(&canvas);
 static LGFX_Sprite bezelSpr(&canvas);
+static LGFX_Sprite rollIndicatorSpr(&canvas);
+static LGFX_Sprite pitchIndicatorSpr(&canvas);
 // RunningAverage airSpeedAngleAvg(1);
 
 /* **********************************************************************************
@@ -19,18 +19,18 @@ static LGFX_Sprite bezelSpr(&canvas);
     Change/add your code as needed.
 ********************************************************************************** */
 
-MF_HI::MF_HI(uint8_t Pin1, uint8_t Pin2)
+MF_AI::MF_AI(uint8_t Pin1, uint8_t Pin2)
 {
     _pin1 = Pin1;
     _pin2 = Pin2;
 }
 
-void MF_HI::begin()
+void MF_AI::begin()
 {
 
 }
 
-void MF_HI::attach(uint16_t Pin3, char *init)
+void MF_AI::attach(uint16_t Pin3, char *init)
 {
     _pin3 = Pin3;
     lcd.init();
@@ -44,26 +44,25 @@ void MF_HI::attach(uint16_t Pin3, char *init)
     lcd.fillScreen(TFT_YELLOW);
 
     canvas.createSprite(240, 480);
-    mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(HI_Main_Gauge), HI_MAIN_GAUGE_WIDTH, HI_MAIN_GAUGE_HEIGHT, 16);
-    headingTapeSpr.setBuffer(const_cast<std::uint16_t *>(HI_Heading_Tape), HI_HEADING_TAPE_WIDTH, HI_HEADING_TAPE_HEIGHT, 16);
-    bezelSpr.setBuffer(const_cast<std::uint16_t *>(Common_Bezel), COMMON_BEZEL_WIDTH, COMMON_BEZEL_HEIGHT, 16);
-    needleSpr.setBuffer(const_cast<std::uint16_t *>(HI_Needle), HI_NEEDLE_WIDTH, HI_NEEDLE_HEIGHT, 16);
+    bezelSpr.setBuffer(const_cast<std::uint16_t *>(AI_Bezel), AI_BEZEL_WIDTH, AI_BEZEL_HEIGHT, 16);
+    rollIndicatorSpr.setBuffer(const_cast<std::uint16_t *>(AI_Roll_Indicator), AI_ROLL_INDICATOR_WIDTH, AI_ROLL_INDICATOR_HEIGHT, 16);
+    pitchIndicatorSpr.setBuffer(const_cast<std::uint16_t *>(AI_Pitch_Indicator), AI_PITCH_INDICATOR_WIDTH, AI_PITCH_INDICATOR_HEIGHT, 16);
 }
 
-void MF_HI::detach()
+void MF_AI::detach()
 {
     if (!_initialised)
         return;
     _initialised = false;
     canvas.deleteSprite();
-    mainGaugeSpr.deleteSprite();
     bezelSpr.deleteSprite();
-    needleSpr.deleteSprite();
-    headingTapeSpr.deleteSprite();
+    rollIndicatorSpr.deleteSprite();
+    pitchIndicatorSpr.deleteSprite();
+    lcd.fillScreen(TFT_BLACK);
     lcd.endWrite();
 }
 
-void MF_HI::set(int16_t messageID, char *setPoint)
+void MF_AI::set(int16_t messageID, char *setPoint)
 {
     /* **********************************************************************************
         Each messageID has it's own value
@@ -87,11 +86,10 @@ void MF_HI::set(int16_t messageID, char *setPoint)
         // tbd., get's called when PowerSavingMode is entered
         break;
     case 0:
-        setHeading(atof(setPoint));
+        setPitchAngle(atof(setPoint));
         break;
     case 1:
-        /* code */
-        setHeadingBug(atof(setPoint));
+        setRollAngle(atof(setPoint));
         break;
     case 2:
         /* code */
@@ -102,65 +100,64 @@ void MF_HI::set(int16_t messageID, char *setPoint)
     drawGauge();
 }
 
-void MF_HI::update()
+void MF_AI::update()
 {
     // Do something which is required regulary
 }
 
-void MF_HI::drawGauge()
+void MF_AI::drawGauge()
 {
-    // VSIAngle = scaleValue(verticalSpeed, -2000, 2000, -170, 170); // The needle starts at -90 degrees
+    if (pitchAngle > 30)
+        pitchAngle = 30;
+    else if (pitchAngle < -30)
+        pitchAngle = -30;
 
-    canvas.fillScreen(TFT_BLACK);
+    pitchIndicatorPosition= scaleValue(pitchAngle, -30, 30, -90, 90); // The needle starts at -90 degrees
 
     drawLeftGauge();
     drawRightGauge();
 }
 
-void MF_HI::setHeading(float value)
+void MF_AI::setRollAngle(float value)
 {
-    heading = value;
+    rollAngle = value;
 }
 
-void MF_HI::setHeadingBug(float value)
+void MF_AI::setPitchAngle(float value)
 {
-    headingBug = value;
+    pitchAngle = value;
 }
 
 
-void MF_HI::drawLeftGauge()
+void MF_AI::drawLeftGauge()
 {
     // Draw Left Half of VSI Gauge
-
-    canvas.fillScreen(TFT_BLACK);
+    canvas.fillScreen(SKYBLUE);
     canvas.setPivot(240, 240);
-
-    headingTapeSpr.setPivot(240, 240);
-    headingTapeSpr.pushRotated(&canvas, heading, BACKGROUND_COLOR);
-    mainGaugeSpr.pushSprite(&canvas, 90, 90, BACKGROUND_COLOR);
-    needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 235);
-    needleSpr.pushRotated(&canvas, headingBug, BACKGROUND_COLOR);
+    rollIndicatorSpr.setPivot(240, 240);
+    pitchIndicatorSpr.setPivot(AI_PITCH_INDICATOR_WIDTH/2, AI_PITCH_INDICATOR_HEIGHT/2 - pitchIndicatorPosition + 4);
+    pitchIndicatorSpr.pushRotated(&canvas, -rollAngle, BACKGROUND_COLOR);
+    rollIndicatorSpr.pushRotated(&canvas, -rollAngle, BACKGROUND_COLOR);
     bezelSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, 0, 0);
 
 }
 
-void MF_HI::drawRightGauge()
+void MF_AI::drawRightGauge()
 {
     // Draw right half
-    canvas.fillScreen(TFT_BLACK);
-    headingTapeSpr.setPivot(240, 240);
+    canvas.fillScreen(SKYBLUE);
     canvas.setPivot(240 - x_offset, 240);
-    headingTapeSpr.pushRotated(&canvas, heading, BACKGROUND_COLOR);
-    mainGaugeSpr.pushSprite(&canvas, 90 - x_offset, 90, BACKGROUND_COLOR);
-    needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 235);
-    needleSpr.pushRotated(&canvas, headingBug, BACKGROUND_COLOR);
+    rollIndicatorSpr.setPivot(240, 240);
+    pitchIndicatorSpr.setPivot(AI_PITCH_INDICATOR_WIDTH/2, AI_PITCH_INDICATOR_HEIGHT/2 - pitchIndicatorPosition + 4);
+    pitchIndicatorSpr.pushRotated(&canvas, -rollAngle, BACKGROUND_COLOR);
+    rollIndicatorSpr.pushRotated(&canvas, -rollAngle, BACKGROUND_COLOR);
     bezelSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, x_offset, 0);
 }
 
 // Scale Function
-float MF_HI::scaleValue(float x, float in_min, float in_max, float out_min, float out_max)
+float MF_AI::scaleValue(float x, float in_min, float in_max, float out_min, float out_max)
 {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }

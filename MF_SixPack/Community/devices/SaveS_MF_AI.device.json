@@ -1,8 +1,8 @@
 {
     "$schema": "./mfdevice.schema.json",
     "Info": {
-      "Label": "MF_ASI",
-      "Type": "MF_ASI",
+      "Label": "MF_AI",
+      "Type": "MF_AI",
       "Author": "SaveS",
       "URL": "https://github.com",
       "Version" : "1.0.0"
@@ -18,13 +18,12 @@
     "MessageTypes": [
       {
         "id": 0,
-        "label": "Air Speed Value",
-        "description": "$ will be displayed as Air Speed value"
-      },
-      {
+        "label": "Pitch Angle",
+        "description": "$ will be displayed as Pitch Angle"
+      },      {
         "id": 1,
-        "label": "TAS Knob Value",
-        "description": "$ will be displayed as True Airspeed (TAS) value"
+        "label": "Roll Angle",
+        "description": "$ will be displayed as Roll Angle"
       }
     ]
   }

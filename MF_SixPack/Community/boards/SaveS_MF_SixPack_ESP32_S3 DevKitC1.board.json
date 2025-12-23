@@ -25,21 +25,17 @@
     "CanInstallFirmware": true,
     "CanResetBoard": true,
     "DelayAfterFirmwareUpdate": 0,
-    "FirmwareBaseName": "saves_mf_sixpack_esp32s3",
+    "FirmwareBaseName": "saves_mf_sixpack_AI_esp32s3",
     "FirmwareExtension": "bin",
-    "FriendlyName": "MF_SixPack",
+    "FriendlyName": "MF_SixPack AI",
     "LatestFirmwareVersion": "2.5.1",
-    "MobiFlightType": "MF_SixPack",
+    "MobiFlightType": "MF_SixPack AI",
     "ResetFirmwareFile": "reset.raspberry_pico_flash_nuke.uf2",
     "CustomDeviceTypes": [
-      "MF_ASI",
-      "MF_VSI",
-      "MF_HI",
-      "MF_TC",
-      "MF_ALT"
+      "MF_AI"
     ],
     "Community": {
-      "Project": "MF_SixPack",
+      "Project": "MF_SixPack_AI",
       "Website": "https://YourWebsite.com",
       "Docs": "https://YourWebsite.com",
       "Support": "https://YourWebsite.com"
