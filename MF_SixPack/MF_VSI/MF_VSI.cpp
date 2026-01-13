@@ -39,8 +39,7 @@ void MF_VSI::attach(uint16_t Pin3, char *init)
 
     lcd.fillScreen(TFT_GREEN);
     lcd.setFont(&fonts::Font4);
-    delay(3000);
-    lcd.fillScreen(TFT_YELLOW);
+    delay(1000);
 
     canvas.createSprite(240, 480);
     mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(VSI_Main_Gauge), VSI_MAIN_GAUGE_WIDTH, VSI_MAIN_GAUGE_HEIGHT, 16);
@@ -95,12 +94,12 @@ void MF_VSI::set(int16_t messageID, char *setPoint)
     default:
         break;
     }
-    drawGauge();
 }
 
 void MF_VSI::update()
 {
     // Do something which is required regulary
+    drawGauge();
 }
 
 void MF_VSI::drawGauge()

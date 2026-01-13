@@ -38,10 +38,9 @@ void MF_HI::attach(uint16_t Pin3, char *init)
 
     lcd.setRotation(3);
 
-    lcd.fillScreen(TFT_GREEN);
+    lcd.fillScreen(TFT_RED);
     lcd.setFont(&fonts::Font4);
-    delay(3000);
-    lcd.fillScreen(TFT_YELLOW);
+    delay(1000);
 
     canvas.createSprite(240, 480);
     mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(HI_Main_Gauge), HI_MAIN_GAUGE_WIDTH, HI_MAIN_GAUGE_HEIGHT, 16);
@@ -99,12 +98,13 @@ void MF_HI::set(int16_t messageID, char *setPoint)
     default:
         break;
     }
-    drawGauge();
+
 }
 
 void MF_HI::update()
 {
     // Do something which is required regulary
+    drawGauge();
 }
 
 void MF_HI::drawGauge()

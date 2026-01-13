@@ -1,7 +1,7 @@
 {
     "$schema": "./mfdevice.schema.json",
     "Info": {
-      "Label": "MF_ASI",
+      "Label": "Airspeed Indicator",
       "Type": "MF_ASI",
       "Author": "SaveS",
       "URL": "https://github.com",

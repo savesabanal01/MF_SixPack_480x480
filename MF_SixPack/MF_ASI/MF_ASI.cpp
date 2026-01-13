@@ -38,9 +38,8 @@ void MF_ASI::attach(uint16_t Pin3, char *init)
 
     lcd.setRotation(3);
 
-    lcd.fillScreen(TFT_RED);
+    lcd.fillScreen(TFT_BLACK);
     lcd.setFont(&fonts::Font4);
-    delay(3000);
     lcd.fillScreen(BACKGROUND_COLOR);
 
     canvas.createSprite(240, 480);
@@ -101,12 +100,13 @@ void MF_ASI::set(int16_t messageID, char *setPoint)
     default:
         break;
     }
-    drawGauge();
+
 }
 
 void MF_ASI::update()
 {
     // Do something which is required regulary
+    drawGauge();
 }
 
 void MF_ASI::drawGauge()

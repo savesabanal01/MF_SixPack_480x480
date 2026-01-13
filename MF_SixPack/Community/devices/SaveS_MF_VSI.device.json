@@ -1,7 +1,7 @@
 {
     "$schema": "./mfdevice.schema.json",
     "Info": {
-      "Label": "MF_VSI",
+      "Label": "Vertical Speed Ind.",
       "Type": "MF_VSI",
       "Author": "SaveS",
       "URL": "https://github.com",

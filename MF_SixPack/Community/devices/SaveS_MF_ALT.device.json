@@ -1,7 +1,7 @@
 {
     "$schema": "./mfdevice.schema.json",
     "Info": {
-      "Label": "MF_ALT",
+      "Label": "Altimeter",
       "Type": "MF_ALT",
       "Author": "SaveS",
       "URL": "https://github.com",

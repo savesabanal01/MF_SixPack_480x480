@@ -39,10 +39,9 @@ void MF_ALT::attach(uint16_t Pin3, char *init)
 
     lcd.setRotation(3);
 
-    lcd.fillScreen(TFT_GREEN);
+    lcd.fillScreen(TFT_RED);
+    delay(1000);
     lcd.setFont(&fonts::Font4);
-    delay(3000);
-    lcd.fillScreen(TFT_YELLOW);
 
     canvas.createSprite(240, 480);
     mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Main_Gauge), ALT_MAIN_GAUGE_WIDTH, ALT_MAIN_GAUGE_HEIGHT, 16);
@@ -105,17 +104,16 @@ void MF_ALT::set(int16_t messageID, char *setPoint)
     default:
         break;
     }
-    drawGauge();
 }
 
 void MF_ALT::update()
 {
     // Do something which is required regulary
+    drawGauge();
 }
 
 void MF_ALT::drawGauge()
 {
-    // VSIAngle = scaleValue(verticalSpeed, -2000, 2000, -170, 170); // The needle starts at -90 degrees
 
     canvas.fillScreen(TFT_BLACK);
     thousand = (int)altitude % 10000;

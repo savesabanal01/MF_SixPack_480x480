@@ -37,6 +37,7 @@ def copy_fw_files (source, target, env):
         fw_file_name = fw_file_name[0:-9]  + "merged_" + firmware_version.replace(".", "_") + ".bin"
         os.replace(old_name, fw_file_name)
 
+
     print("Copying community folder")
     shutil.copy(fw_file_name, "./_build/" + custom_source_folder + "/Community/firmware")
     original_folder_path = "./_build/" + custom_source_folder + "/Community"

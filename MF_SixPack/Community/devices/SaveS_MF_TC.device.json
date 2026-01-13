@@ -1,7 +1,7 @@
 {
     "$schema": "./mfdevice.schema.json",
     "Info": {
-      "Label": "MF_TC",
+      "Label": "Turn Coordinator",
       "Type": "MF_TC",
       "Author": "SaveS",
       "URL": "https://github.com",

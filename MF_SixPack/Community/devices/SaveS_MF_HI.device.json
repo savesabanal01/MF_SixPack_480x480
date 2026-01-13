@@ -1,7 +1,7 @@
 {
     "$schema": "./mfdevice.schema.json",
     "Info": {
-      "Label": "MF_HI",
+      "Label": "Heading Indicator",
       "Type": "MF_HI",
       "Author": "SaveS",
       "URL": "https://github.com",
