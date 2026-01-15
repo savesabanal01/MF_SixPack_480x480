@@ -33,6 +33,9 @@ private:
     float thousand = 0; // thousand value for the needle1000
     float hundred = 0;  // hundred value for the needle100
     uint16_t x_offset = 240;
+    uint16_t BACKLIGHT_PIN = 38;
+    bool powerSaveFlag = false;
+    uint8_t instrumentBrightness = 255;
 
     // Functions
     float scaleValue(float x, float in_min, float in_max, float out_min, float out_max);
@@ -41,4 +44,6 @@ private:
     void drawRightGauge();
     void setAltitude(float value);    // angle for heading
     void setBaro(float value); // angle for heading bug
+    void setPowerSave(bool enabed);
+    void setInstrumentBrightness(uint8_t value);
 };

@@ -23,20 +23,22 @@ private:
 
     float rawAngle = 0;
     float angle = 0;
-    double encoder = -1;
+    // double encoder = -1;
     float TASangle = 0;
     uint16_t x_offset = 240;
     float startTIme = 0;
     float endTime = 0;
     float airSpeedFromSim = 0;
     float TASRatio = 0;
+    bool powerSaveFlag = false;
+    uint8_t instrumentBrightness = 255;
 
     // Cessna 172 Default V Speeds
     uint16_t V_S0 = 48;
     uint16_t V_S1 = 40;
     uint16_t V_FE = 85;
     // uint16_t V_FE = 50;
-    uint16_t V_N0 = 129;
+    uint16_t V_NO = 129;
     uint16_t V_NE = 163;
 
     uint16_t whiteArcStartAngle;
@@ -48,6 +50,8 @@ private:
     uint16_t V_NEArcStartAngle;
     uint16_t V_NEArcEndAngle;
 
+    uint16_t BACKLIGHT_PIN = 38;
+
     // Functions
     float scaleValue(float x, float in_min, float in_max, float out_min, float out_max);
     void drawGauge();
@@ -56,4 +60,11 @@ private:
     float calculateAngle(float airSpeed);
     void setAirSpeed(float value);
     void setTASRatio(float value);
+    void setVS0(float value);
+    void setVS1(float value);
+    void setVFE(float value);
+    void setVNO(float value);
+    void setVNE(float value);
+    void setPowerSave(bool enabled);
+    void setInstrumentBrightness(uint8_t value);
 };

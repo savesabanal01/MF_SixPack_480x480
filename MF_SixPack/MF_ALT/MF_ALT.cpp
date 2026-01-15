@@ -2,6 +2,8 @@
 #include "allocateMem.h"
 #include "commandmessenger.h"
 #include "4inchLCDConfig_Guition.h"
+#include "LCDBrightnessTable.h"
+#include "RunningAverage.h"
 
 #define BACKGROUND_COLOR  0x1041
 
@@ -13,7 +15,12 @@ static LGFX_Sprite bezelSpr(&canvas);
 static LGFX_Sprite needle100Spr(&canvas);
 static LGFX_Sprite needle1000Spr(&canvas);
 static LGFX_Sprite needle10000Spr(&canvas);
-// RunningAverage airSpeedAngleAvg(1);
+
+uint16_t ALTMessageID = -100;
+
+RunningAverage RA_Altitude(5);
+RunningAverage RA_BaroAngle(5);
+
 
 /* **********************************************************************************
     This is just the basic code to set up your custom device.
@@ -51,7 +58,11 @@ void MF_ALT::attach(uint16_t Pin3, char *init)
     needle1000Spr.setBuffer(const_cast<std::uint16_t *>(ALT_Needle_1000), ALT_NEEDLE_1000_WIDTH, ALT_NEEDLE_1000_HEIGHT, 16);
     needle10000Spr.setBuffer(const_cast<std::uint16_t *>(ALT_Needle_10000), ALT_NEEDLE_10000_WIDTH, ALT_NEEDLE_10000_HEIGHT, 16);
 
+    RA_Altitude.clear();
+    RA_BaroAngle.clear();
+
 }
+
 
 void MF_ALT::detach()
 {
@@ -79,10 +90,8 @@ void MF_ALT::set(int16_t messageID, char *setPoint)
         MessageID == -1 will be send from the connector when Connector stops running
         Put in your code to enter this mode (e.g. clear a display)
 
-    ********************************************************************************** */
-    // int32_t  data = atoi(setPoint);
-    // uint16_t output;
-
+    ********************************************************************************** */;
+    ALTMessageID = messageID;
     // do something according your messageID
     switch (messageID) {
     case -1:
@@ -109,34 +118,36 @@ void MF_ALT::set(int16_t messageID, char *setPoint)
 void MF_ALT::update()
 {
     // Do something which is required regulary
-    drawGauge();
+    if (ALTMessageID == -1 || powerSaveFlag == true)  // Mobiflight Connector has stopped or entered power save mode
+    {
+        lcd.fillScreen(TFT_BLACK);
+        analogWrite(BACKLIGHT_PIN, 0);
+    }
+    else
+    {
+        float pwmOutput = 0;
+        pwmOutput = CIE_LIGHTNESS_TO_PWM_LUT_256_IN_8BIT_OUT[(int)instrumentBrightness]; // needed to correct PWM output due to human eye brightness perception
+        analogWrite(BACKLIGHT_PIN, pwmOutput);
+        drawGauge();
+    }
 }
 
 void MF_ALT::drawGauge()
 {
 
+    RA_Altitude.addValue(altitude);
     canvas.fillScreen(TFT_BLACK);
-    thousand = (int)altitude % 10000;
-    hundred = (int)altitude % 1000;
-    needle10000Angle = scaleValue(altitude, 0, 10000, 0, 360);
+    thousand = (int)RA_Altitude.getAverage() % 10000;
+    hundred = (int)RA_Altitude.getAverage() % 1000;
+    needle10000Angle = scaleValue(RA_Altitude.getAverage(), 0, 10000, 0, 360);
     needle1000Angle = scaleValue(thousand, 0, 1000, 0, 360);
     needle100Angle = scaleValue(hundred, 0, 100, 0, 360);
     baroAngle = scaleValue(baro, 31.1, 28.6, -131, 131);
+    RA_BaroAngle.addValue(baroAngle);
     
     drawLeftGauge();
     drawRightGauge();
 }
-
-void MF_ALT::setAltitude(float value)
-{
-    altitude = value;
-}
-
-void MF_ALT::setBaro(float value)
-{
-    baro = value;
-}
-
 
 void MF_ALT::drawLeftGauge()
 {
@@ -145,7 +156,7 @@ void MF_ALT::drawLeftGauge()
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240, 240);
     baroSpr.setPivot(240, 240);
-    baroSpr.pushRotated(&canvas, baroAngle);
+    baroSpr.pushRotated(&canvas, RA_BaroAngle.getAverage());
 
     mainGaugeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
 
@@ -170,7 +181,7 @@ void MF_ALT::drawRightGauge()
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240 - x_offset, 240);
     baroSpr.setPivot(240, 240);
-    baroSpr.pushRotated(&canvas, baroAngle);
+    baroSpr.pushRotated(&canvas, RA_BaroAngle.getAverage());
 
     mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
 
@@ -188,6 +199,19 @@ void MF_ALT::drawRightGauge()
     canvas.pushSprite(&lcd, x_offset, 0);
 }
 
+// Setters
+void MF_ALT::setAltitude(float value)
+{
+    altitude = value;
+}
+
+void MF_ALT::setBaro(float value)
+{
+    baro = value;
+}
+
+void setPowerSave(bool enabed);
+void setInstrumentBrightness(uint8_t value);
 // Scale Function
 float MF_ALT::scaleValue(float x, float in_min, float in_max, float out_min, float out_max)
 {

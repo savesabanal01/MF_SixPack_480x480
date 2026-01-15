@@ -3,6 +3,8 @@
 #include "commandmessenger.h"
 #include "4inchLCDConfig_Guition.h"
 #include "Common_Bezel.h"
+#include "RunningAverage.h"
+#include "LCDBrightnessTable.h"
 
 #define BACKGROUND_COLOR  0x1041
 
@@ -13,7 +15,11 @@ static LGFX_Sprite planeSpr(&canvas);
 static LGFX_Sprite ballSpr(&canvas);
 static LGFX_Sprite markerSpr(&canvas);
 static LGFX_Sprite bezelSpr(&canvas);
-// RunningAverage airSpeedAngleAvg(1);
+
+RunningAverage RA_TurnAngle(5);
+RunningAverage RA_SlipAngle(5);
+
+uint16_t TCMessageID = -100;
 
 /* **********************************************************************************
     This is just the basic code to set up your custom device.
@@ -77,8 +83,7 @@ void MF_TC::set(int16_t messageID, char *setPoint)
         Put in your code to enter this mode (e.g. clear a display)
 
     ********************************************************************************** */
-    // int32_t  data = atoi(setPoint);
-    // uint16_t output;
+   TCMessageID = messageID;
 
     // do something according your messageID
     switch (messageID) {
@@ -95,8 +100,9 @@ void MF_TC::set(int16_t messageID, char *setPoint)
         /* code */
         setSlipAngle(atof(setPoint));
         break;
-    case 2:
+    case 100:
         /* code */
+        setInstrumentBrightness(atoi(setPoint));
         break;
     default:
         break;
@@ -106,31 +112,32 @@ void MF_TC::set(int16_t messageID, char *setPoint)
 void MF_TC::update()
 {
     // Do something which is required regulary
-    drawGauge();
+    if (TCMessageID == -1 || powerSaveFlag == true)  // Mobiflight Connector has stopped or entered power save mode
+    {
+        lcd.fillScreen(TFT_BLACK);
+        analogWrite(BACKLIGHT_PIN, 0);
+    }
+    else
+    {
+        float pwmOutput = 0;
+        pwmOutput = CIE_LIGHTNESS_TO_PWM_LUT_256_IN_8BIT_OUT[(int)instrumentBrightness]; // needed to correct PWM output due to human eye brightness perception
+        analogWrite(BACKLIGHT_PIN, pwmOutput);
+        drawGauge();
+    }
 }
 
 void MF_TC::drawGauge()
 {
-    // VSIAngle = scaleValue(verticalSpeed, -2000, 2000, -170, 170); // The needle starts at -90 degrees
+
+    RA_TurnAngle.addValue(turnAngle);
+    RA_SlipAngle.addValue(slipAngle);
 
     canvas.fillScreen(TFT_BLACK);
-    ballXPos = (int)round(scaleValue(slipAngle, 8, -8, 120, 360 - TC_BALL_WIDTH));
+    ballXPos = (int)round(scaleValue(RA_SlipAngle.getAverage(), 8, -8, 120, 360 - TC_BALL_WIDTH));
     ballYPos = 260 + (int)(56 * sqrt((1 - (((ballXPos - 190) * (ballXPos - 190) / (190 * 190)))))); // Approximation based on Ellipse equation
     drawLeftGauge();
     drawRightGauge();
 }
-
-void MF_TC::setTurnAngle(float value)
-{
-    turnAngle = value;
-}
-
-void MF_TC::setSlipAngle(float value)
-{
-    slipAngle = value;
-}
-
-
 
 void MF_TC::drawLeftGauge()
 {
@@ -141,7 +148,7 @@ void MF_TC::drawLeftGauge()
 
     mainGaugeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
     planeSpr.setPivot(TC_PLANE_WIDTH / 2, 56);
-    planeSpr.pushRotated(&canvas, turnAngle, BACKGROUND_COLOR);
+    planeSpr.pushRotated(&canvas, RA_TurnAngle.getAverage(), BACKGROUND_COLOR);
     ballSpr.pushSprite(&canvas, ballXPos, ballYPos, BACKGROUND_COLOR);
     markerSpr.pushSprite(&canvas, 208, 313, BACKGROUND_COLOR);
     bezelSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
@@ -156,11 +163,32 @@ void MF_TC::drawRightGauge()
   canvas.setPivot(240 - x_offset, 256);
   mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
   planeSpr.setPivot(TC_PLANE_WIDTH / 2, 56);
-  planeSpr.pushRotated(&canvas, (int)round(turnAngle), BACKGROUND_COLOR);
+  planeSpr.pushRotated(&canvas, RA_TurnAngle.getAverage(), BACKGROUND_COLOR);
   ballSpr.pushSprite(&canvas, ballXPos - x_offset, ballYPos, BACKGROUND_COLOR);
   markerSpr.pushSprite(&canvas, 208 - x_offset, 313, BACKGROUND_COLOR);
   bezelSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
   canvas.pushSprite(&lcd, x_offset, 0);
+}
+
+// Setter
+void MF_TC::setTurnAngle(float value)
+{
+    turnAngle = value;
+}
+
+void MF_TC::setSlipAngle(float value)
+{
+    slipAngle = value;
+}
+
+void MF_TC::setPowerSave(bool enabled)
+{
+    powerSaveFlag = enabled;  
+}
+
+void MF_TC::setInstrumentBrightness(uint8_t value)
+{
+    instrumentBrightness = value;
 }
 
 // Scale Function

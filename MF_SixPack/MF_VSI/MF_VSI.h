@@ -23,6 +23,10 @@ private:
     float verticalSpeed = 0;
     float VSIAngle = 0;
     uint16_t x_offset = 240;
+    bool powerSaveFlag = false;
+    uint8_t instrumentBrightness = 255;
+
+    uint16_t BACKLIGHT_PIN = 38;
 
     // Functions
     float scaleValue(float x, float in_min, float in_max, float out_min, float out_max);
@@ -30,4 +34,6 @@ private:
     void drawLeftGauge();
     void drawRightGauge();
     void setVerticalSpeed(float value);
+    void setPowerSave(bool enabled);
+    void setInstrumentBrightness(uint8_t value);
 };

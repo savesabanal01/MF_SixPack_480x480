@@ -3,6 +3,8 @@
 #include "commandmessenger.h"
 #include "4inchLCDConfig_Guition.h"
 #include "Common_Bezel.h"
+#include "RunningAverage.h"
+#include "LCDBrightnessTable.h"
 
 #define BACKGROUND_COLOR  0x1041
 
@@ -12,7 +14,11 @@ static LGFX_Sprite headingTapeSpr(&canvas);
 static LGFX_Sprite mainGaugeSpr(&canvas);
 static LGFX_Sprite needleSpr(&canvas);
 static LGFX_Sprite bezelSpr(&canvas);
-// RunningAverage airSpeedAngleAvg(1);
+
+RunningAverage RA_Heading(5);
+RunningAverage RA_HeadingBug(5);
+
+uint16_t HIMessageID = -100;
 
 /* **********************************************************************************
     This is just the basic code to set up your custom device.
@@ -47,6 +53,9 @@ void MF_HI::attach(uint16_t Pin3, char *init)
     headingTapeSpr.setBuffer(const_cast<std::uint16_t *>(HI_Heading_Tape), HI_HEADING_TAPE_WIDTH, HI_HEADING_TAPE_HEIGHT, 16);
     bezelSpr.setBuffer(const_cast<std::uint16_t *>(Common_Bezel), COMMON_BEZEL_WIDTH, COMMON_BEZEL_HEIGHT, 16);
     needleSpr.setBuffer(const_cast<std::uint16_t *>(HI_Needle), HI_NEEDLE_WIDTH, HI_NEEDLE_HEIGHT, 16);
+
+    RA_Heading.clear();
+    RA_HeadingBug.clear();
 }
 
 void MF_HI::detach()
@@ -74,8 +83,7 @@ void MF_HI::set(int16_t messageID, char *setPoint)
         Put in your code to enter this mode (e.g. clear a display)
 
     ********************************************************************************** */
-    // int32_t  data = atoi(setPoint);
-    // uint16_t output;
+    HIMessageID = messageID;
 
     // do something according your messageID
     switch (messageID) {
@@ -84,6 +92,7 @@ void MF_HI::set(int16_t messageID, char *setPoint)
         break;
     case -2:
         // tbd., get's called when PowerSavingMode is entered
+        setPowerSave((bool)atoi(setPoint));
         break;
     case 0:
         setHeading(atof(setPoint));
@@ -92,8 +101,9 @@ void MF_HI::set(int16_t messageID, char *setPoint)
         /* code */
         setHeadingBug(atof(setPoint));
         break;
-    case 2:
+   case 100:
         /* code */
+        setInstrumentBrightness(atoi(setPoint));
         break;
     default:
         break;
@@ -104,7 +114,21 @@ void MF_HI::set(int16_t messageID, char *setPoint)
 void MF_HI::update()
 {
     // Do something which is required regulary
-    drawGauge();
+    RA_Heading.addValue(heading);
+    RA_HeadingBug.addValue(headingBug);
+    // Do something which is required regulary
+    if (HIMessageID == -1 || powerSaveFlag == true)  // Mobiflight Connector has stopped or entered power save mode
+    {
+        lcd.fillScreen(TFT_BLACK);
+        analogWrite(BACKLIGHT_PIN, 0);
+    }
+    else
+    {
+        float pwmOutput = 0;
+        pwmOutput = CIE_LIGHTNESS_TO_PWM_LUT_256_IN_8BIT_OUT[(int)instrumentBrightness]; // needed to correct PWM output due to human eye brightness perception
+        analogWrite(BACKLIGHT_PIN, pwmOutput);
+        drawGauge();
+    }
 }
 
 void MF_HI::drawGauge()
@@ -117,17 +141,6 @@ void MF_HI::drawGauge()
     drawRightGauge();
 }
 
-void MF_HI::setHeading(float value)
-{
-    heading = value;
-}
-
-void MF_HI::setHeadingBug(float value)
-{
-    headingBug = value;
-}
-
-
 void MF_HI::drawLeftGauge()
 {
     // Draw Left Half of VSI Gauge
@@ -136,10 +149,10 @@ void MF_HI::drawLeftGauge()
     canvas.setPivot(240, 240);
 
     headingTapeSpr.setPivot(240, 240);
-    headingTapeSpr.pushRotated(&canvas, heading, BACKGROUND_COLOR);
+    headingTapeSpr.pushRotated(&canvas, RA_Heading.getAverage(), BACKGROUND_COLOR);
     mainGaugeSpr.pushSprite(&canvas, 90, 90, BACKGROUND_COLOR);
     needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 235);
-    needleSpr.pushRotated(&canvas, headingBug, BACKGROUND_COLOR);
+    needleSpr.pushRotated(&canvas, RA_HeadingBug.getAverage(), BACKGROUND_COLOR);
     bezelSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, 0, 0);
 
@@ -151,12 +164,33 @@ void MF_HI::drawRightGauge()
     canvas.fillScreen(TFT_BLACK);
     headingTapeSpr.setPivot(240, 240);
     canvas.setPivot(240 - x_offset, 240);
-    headingTapeSpr.pushRotated(&canvas, heading, BACKGROUND_COLOR);
+    headingTapeSpr.pushRotated(&canvas, RA_Heading.getAverage(), BACKGROUND_COLOR);
     mainGaugeSpr.pushSprite(&canvas, 90 - x_offset, 90, BACKGROUND_COLOR);
     needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 235);
-    needleSpr.pushRotated(&canvas, headingBug, BACKGROUND_COLOR);
+    needleSpr.pushRotated(&canvas, RA_HeadingBug.getAverage(), BACKGROUND_COLOR);
     bezelSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, x_offset, 0);
+}
+
+// Setters
+void MF_HI::setHeading(float value)
+{
+    heading = value;
+}
+
+void MF_HI::setHeadingBug(float value)
+{
+    headingBug = value;
+}
+
+void MF_HI::setPowerSave(bool enabled)
+{
+    powerSaveFlag = enabled;
+}
+
+void MF_HI::setInstrumentBrightness(uint8_t value)
+{
+    instrumentBrightness = value;
 }
 
 // Scale Function

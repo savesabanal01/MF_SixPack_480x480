@@ -2,6 +2,8 @@
 #include "allocateMem.h"
 #include "commandmessenger.h"
 #include "4inchLCDConfig_Guition.h"
+#include "RunningAverage.h"
+#include "LCDBrightnessTable.h"
 
 static LGFX lcd;
 static LGFX_Sprite canvas(&lcd);
@@ -12,7 +14,10 @@ static LGFX_Sprite needleSpr(&canvas);
 
 #define BACKGROUND_COLOR  0x1041
 
-// RunningAverage airSpeedAngleAvg(1);
+RunningAverage RA_AirspeedAngle(5);
+RunningAverage RA_TASKnobAngle(5);
+
+uint16_t ASIMessageID = -100;
 
 /* **********************************************************************************
     This is just the basic code to set up your custom device.
@@ -47,8 +52,9 @@ void MF_ASI::attach(uint16_t Pin3, char *init)
     numberTapeSpr.setBuffer(const_cast<std::uint16_t *>(ASI_Number_Tape), ASI_NUMBER_TAPE_WIDTH, ASI_NUMBER_TAPE_HEIGHT, 16);
     labelsSpr.setBuffer(const_cast<std::uint16_t *>(ASI_Labels), ASI_LABELS_WIDTH, ASI_LABELS_HEIGHT, 16);
     needleSpr.setBuffer(const_cast<std::uint16_t *>(ASI_Needle), ASI_NEEDLE_WIDTH, ASI_NEEDLE_HEIGHT, 16);
-    // ESP Now setup
-    // airSpeedAngleAvg.clear();
+
+    RA_AirspeedAngle.clear();
+    RA_TASKnobAngle.clear();
 }
 
 void MF_ASI::detach()
@@ -76,8 +82,7 @@ void MF_ASI::set(int16_t messageID, char *setPoint)
         Put in your code to enter this mode (e.g. clear a display)
 
     ********************************************************************************** */
-    // int32_t  data = atoi(setPoint);
-    // uint16_t output;
+    ASIMessageID = messageID;
 
     // do something according your messageID
     switch (messageID) {
@@ -86,6 +91,7 @@ void MF_ASI::set(int16_t messageID, char *setPoint)
         break;
     case -2:
         // tbd., get's called when PowerSavingMode is entered
+        setPowerSave((bool)atoi(setPoint));
         break;
     case 0:
         setAirSpeed(atof(setPoint));
@@ -96,6 +102,27 @@ void MF_ASI::set(int16_t messageID, char *setPoint)
         break;
     case 2:
         /* code */
+        setVS0(atof(setPoint));
+        break;
+    case 3:
+        /* code */
+        setVS1(atof(setPoint));
+        break;
+    case 4:
+        /* code */
+        setVFE(atof(setPoint));
+        break;
+    case 5:
+        /* code */
+        setVNO(atof(setPoint));
+        break;
+    case 6:
+        /* code */
+        setVNE(atof(setPoint));
+        break;
+    case 100:
+        /* code */
+        setInstrumentBrightness(atoi(setPoint));
         break;
     default:
         break;
@@ -106,22 +133,32 @@ void MF_ASI::set(int16_t messageID, char *setPoint)
 void MF_ASI::update()
 {
     // Do something which is required regulary
-    drawGauge();
+    if (ASIMessageID == -1 || powerSaveFlag == true)  // Mobiflight Connector has stopped or entered power save mode
+    {
+        lcd.fillScreen(TFT_BLACK);
+        analogWrite(BACKLIGHT_PIN, 0);
+    }
+    else
+    {
+        float pwmOutput = 0;
+        pwmOutput = CIE_LIGHTNESS_TO_PWM_LUT_256_IN_8BIT_OUT[(int)instrumentBrightness]; // needed to correct PWM output due to human eye brightness perception
+        analogWrite(BACKLIGHT_PIN, pwmOutput);
+        drawGauge();
+    }
 }
 
 void MF_ASI::drawGauge()
 {
     rawAngle = calculateAngle(airSpeedFromSim);
-    // airSpeedAngleAvg.addValue(rawAngle);
-    // angle = airSpeedAngleAvg.getAverage();
-    angle = rawAngle;
+    RA_AirspeedAngle.addValue(rawAngle);
 
     TASangle = scaleValue(TASRatio, -1, 1, 15, -95);
+    RA_TASKnobAngle.addValue(TASangle);
 
     whiteArcStartAngle = calculateAngle(V_S1);
     whiteArcEndAngle = calculateAngle(V_FE);
     greenArcStartAngle = calculateAngle(V_S0);
-    greenArcEndAngle = calculateAngle(V_N0);
+    greenArcEndAngle = calculateAngle(V_NO);
     yellowArcStartAngle = greenArcEndAngle;
     yellowArcEndAngle = calculateAngle(V_NE);
     V_NEArcStartAngle = yellowArcEndAngle;
@@ -134,15 +171,6 @@ void MF_ASI::drawGauge()
     drawRightGauge();
 }
 
-void MF_ASI::setAirSpeed(float value)
-{
-    airSpeedFromSim = value;
-}
-
-void MF_ASI::setTASRatio(float value)
-{
-    TASRatio = value;
-}
 
 void MF_ASI::drawLeftGauge()
 {
@@ -153,7 +181,7 @@ void MF_ASI::drawLeftGauge()
     // Draw left half
     numberTapeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
     numberTapeSpr.setPivot(240, 240);
-    numberTapeSpr.pushRotated(&canvas, TASangle, BACKGROUND_COLOR);
+    numberTapeSpr.pushRotated(&canvas, RA_TASKnobAngle.getAverage(), BACKGROUND_COLOR);
     mainGaugeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
 
     // Draw White Arc
@@ -173,7 +201,7 @@ void MF_ASI::drawLeftGauge()
     labelsSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
 
     // Finally, draw the needle
-    needleSpr.pushRotated(&canvas, angle, BACKGROUND_COLOR);
+    needleSpr.pushRotated(&canvas, RA_AirspeedAngle.getAverage(), BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, 0, 0);
 }
 
@@ -183,7 +211,7 @@ void MF_ASI::drawRightGauge()
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240 - x_offset, 240);
     needleSpr.setPivot(ASI_NEEDLE_WIDTH / 2, 240);
-    numberTapeSpr.pushRotated(&canvas, TASangle, BACKGROUND_COLOR);
+    numberTapeSpr.pushRotated(&canvas, RA_TASKnobAngle.getAverage(), BACKGROUND_COLOR);
     mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
 
     // Draw White Arc
@@ -197,15 +225,10 @@ void MF_ASI::drawRightGauge()
     // Draw the labels
     labelsSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
     // Finally, draw the needle
-    needleSpr.pushRotated(&canvas, angle, BACKGROUND_COLOR);
+    needleSpr.pushRotated(&canvas, RA_AirspeedAngle.getAverage(), BACKGROUND_COLOR);
 
     // Push the canvas sprite to the lcd screen
     canvas.pushSprite(&lcd, x_offset, 0);
-}
-// Scale Function
-float MF_ASI::scaleValue(float x, float in_min, float in_max, float out_min, float out_max)
-{
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 // Calculate the angle of the needle, etc. based on the air speed because the markers are not linear
@@ -248,4 +271,57 @@ float MF_ASI::calculateAngle(float airSpeed)
         calculatedAngle = 320;
 
     return calculatedAngle;
+}
+
+// Setters
+void MF_ASI::setAirSpeed(float value)
+{
+    airSpeedFromSim = value;
+}
+
+void MF_ASI::setTASRatio(float value)
+{
+    TASRatio = value;
+}
+
+void MF_ASI::setVS0(float value)
+{
+    V_S0 = value;
+}
+
+
+void MF_ASI::setVS1(float value)
+{
+    V_S1 = value;
+}
+
+void MF_ASI::setVFE(float value)
+{
+    V_FE = value;
+}
+
+void MF_ASI::setVNO(float value)
+{
+    V_NO = value;
+}
+
+void MF_ASI::setVNE(float value)
+{
+    V_NE = value;
+}
+
+void MF_ASI::setInstrumentBrightness(uint8_t value)
+{
+    instrumentBrightness = value;
+}
+
+void MF_ASI::setPowerSave(bool enabled)
+{
+    powerSaveFlag = enabled;
+}
+
+// Scale Function
+float MF_ASI::scaleValue(float x, float in_min, float in_max, float out_min, float out_max)
+{
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }

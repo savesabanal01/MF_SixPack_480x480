@@ -9,9 +9,7 @@
     },
     "Config": {
       "Pins": [
-        "Pin 1",
-        "Pin 2",
-        "Pin 3"
+        "Dummy_PIN"
       ],
       "isI2C": false
     },
@@ -25,6 +23,36 @@
         "id": 1,
         "label": "TAS Knob Value",
         "description": "$ will be displayed as True Airspeed (TAS) value"
+      },
+      {
+        "id": 2,
+        "label": "Stall Speed (VS0)",
+        "description": "$ will be displayed as Stall Speed value"
+      },
+      {
+        "id": 3,
+        "label": "Min Steady Flight Speed (VS1)",
+        "description": "$ will be displayed as VS1 value"
+      },
+      {
+        "id": 4,
+        "label": "Max Flap Extend Speed (VFE)",
+        "description": "$ will be displayed as VNO Speed value"
+      },
+      {
+        "id": 5,
+        "label": "Max speed for normal operations(VNO)",
+        "description": "$ will be displayed as VNO value"
+      },
+      {
+        "id": 6,
+        "label": "Never Exceed Speed (VNE)",
+        "description": "$ will be displayed as VNE value"
+      },
+      {
+        "id": 100,
+        "label": "Instrument Brightness",
+        "description": "$ will be displayed Instrument Brightness value"
       }
     ]
   }

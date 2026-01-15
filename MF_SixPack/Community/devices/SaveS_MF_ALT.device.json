@@ -9,9 +9,7 @@
     },
     "Config": {
       "Pins": [
-        "Pin 1",
-        "Pin 2",
-        "Pin 3"
+        "Dummy_PIN"
       ],
       "isI2C": false
     },
@@ -24,6 +22,11 @@
         "id": 1,
         "label": "Baro",
         "description": "$ will be displayed as Baro value"
+      },
+      {
+        "id": 100,
+        "label": "Instrument Brightness",
+        "description": "$ will be displayed Instrument Brightness value"
       }
     ]
   }
