@@ -56,8 +56,8 @@ void MF_ALT::attach(uint16_t Pin3, char *init)
 
     canvas.createSprite(240, 480);
     mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Main_Gauge), ALT_MAIN_GAUGE_WIDTH, ALT_MAIN_GAUGE_HEIGHT, 16);
-    baroInHgSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Baro_InHg), ALT_BARO_INHG_WIDTH, ALT_BARO_INHG_HEIGHT, 8);
-    baroHpaSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Baro_Hpa), ALT_BARO_HPA_WIDTH, ALT_BARO_HPA_HEIGHT, 8);
+    baroInHgSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Baro_InHg), ALT_BARO_INHG_WIDTH, ALT_BARO_INHG_HEIGHT, 16);
+    baroHpaSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Baro_Hpa), ALT_BARO_HPA_WIDTH, ALT_BARO_HPA_HEIGHT, 16);
     bezelSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Bezel), ALT_BEZEL_WIDTH, ALT_BEZEL_HEIGHT, 16);
     needle100Spr.setBuffer(const_cast<std::uint16_t *>(ALT_Needle_100), ALT_NEEDLE_100_WIDTH, ALT_NEEDLE_100_HEIGHT, 16);
     needle1000Spr.setBuffer(const_cast<std::uint16_t *>(ALT_Needle_1000), ALT_NEEDLE_1000_WIDTH, ALT_NEEDLE_1000_HEIGHT, 16);
