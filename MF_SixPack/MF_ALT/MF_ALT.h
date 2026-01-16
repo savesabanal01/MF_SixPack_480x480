@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include "include/ALT_Baro_InHg.h"
+#include "include/ALT_Baro_Hpa.h"
 #include "include/ALT_Bezel.h"
 #include "include/ALT_Main_Gauge.h"
 #include "include/ALT_Needle_100.h"
@@ -25,8 +26,10 @@ private:
     uint8_t _pin1, _pin2, _pin3;
  // Variables
     float altitude = 0;   // altitude value from sim
-    float baro = 0;     // baro value from sim
+    float baro = 29.92;     // baro value from sim
+    float baroHpa = baro * 33.8639;
     float baroAngle = 0;
+    float baroHpaAngle = 0;
     float needle100Angle = 0;
     float needle1000Angle = 0;
     float needle10000Angle = 0;

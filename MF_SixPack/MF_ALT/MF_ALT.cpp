@@ -7,10 +7,13 @@
 
 #define BACKGROUND_COLOR  0x1041
 
+#define INHG_TO_HPA 33.8639
+
 static LGFX lcd;
 static LGFX_Sprite canvas(&lcd);
 static LGFX_Sprite mainGaugeSpr(&canvas);
-static LGFX_Sprite baroSpr(&canvas);
+static LGFX_Sprite baroInHgSpr(&canvas);
+static LGFX_Sprite baroHpaSpr(&canvas);
 static LGFX_Sprite bezelSpr(&canvas);
 static LGFX_Sprite needle100Spr(&canvas);
 static LGFX_Sprite needle1000Spr(&canvas);
@@ -20,6 +23,7 @@ uint16_t ALTMessageID = -100;
 
 RunningAverage RA_Altitude(5);
 RunningAverage RA_BaroAngle(5);
+RunningAverage RA_BaroHpaAngle(5);
 
 
 /* **********************************************************************************
@@ -52,7 +56,8 @@ void MF_ALT::attach(uint16_t Pin3, char *init)
 
     canvas.createSprite(240, 480);
     mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Main_Gauge), ALT_MAIN_GAUGE_WIDTH, ALT_MAIN_GAUGE_HEIGHT, 16);
-    baroSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Baro_InHg), ALT_BARO_INHG_WIDTH, ALT_BARO_INHG_HEIGHT, 16);
+    baroInHgSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Baro_InHg), ALT_BARO_INHG_WIDTH, ALT_BARO_INHG_HEIGHT, 8);
+    baroHpaSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Baro_Hpa), ALT_BARO_HPA_WIDTH, ALT_BARO_HPA_HEIGHT, 8);
     bezelSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Bezel), ALT_BEZEL_WIDTH, ALT_BEZEL_HEIGHT, 16);
     needle100Spr.setBuffer(const_cast<std::uint16_t *>(ALT_Needle_100), ALT_NEEDLE_100_WIDTH, ALT_NEEDLE_100_HEIGHT, 16);
     needle1000Spr.setBuffer(const_cast<std::uint16_t *>(ALT_Needle_1000), ALT_NEEDLE_1000_WIDTH, ALT_NEEDLE_1000_HEIGHT, 16);
@@ -72,7 +77,7 @@ void MF_ALT::detach()
     canvas.deleteSprite();
     mainGaugeSpr.deleteSprite();
     bezelSpr.deleteSprite();
-    baroSpr.deleteSprite();
+    baroInHgSpr.deleteSprite();
     needle100Spr.deleteSprite();
     needle1000Spr.deleteSprite();
     needle10000Spr.deleteSprite();
@@ -134,17 +139,22 @@ void MF_ALT::update()
 
 void MF_ALT::drawGauge()
 {
+    baroHpa = baro * INHG_TO_HPA;
 
     RA_Altitude.addValue(altitude);
     canvas.fillScreen(TFT_BLACK);
     thousand = (int)RA_Altitude.getAverage() % 10000;
     hundred = (int)RA_Altitude.getAverage() % 1000;
-    needle10000Angle = scaleValue(RA_Altitude.getAverage(), 0, 10000, 0, 360);
-    needle1000Angle = scaleValue(thousand, 0, 1000, 0, 360);
-    needle100Angle = scaleValue(hundred, 0, 100, 0, 360);
-    baroAngle = scaleValue(baro, 31.1, 28.6, -131, 131);
+    needle10000Angle = scaleValue(RA_Altitude.getAverage(), 0, 100000, 0, 360);
+    needle1000Angle = scaleValue(thousand, 0, 10000, 0, 360);
+    needle100Angle = scaleValue(hundred, 0, 1000, 0, 360);
+
+    baroAngle = scaleValue(baro, 28.2, 31.6, 170, -170);
     RA_BaroAngle.addValue(baroAngle);
     
+    baroHpaAngle = scaleValue(baro, 925, 1095, 170, -170);
+    RA_BaroHpaAngle.addValue(baroHpaAngle);
+
     drawLeftGauge();
     drawRightGauge();
 }
@@ -155,8 +165,9 @@ void MF_ALT::drawLeftGauge()
 
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240, 240);
-    baroSpr.setPivot(240, 240);
-    baroSpr.pushRotated(&canvas, RA_BaroAngle.getAverage());
+
+    baroHpaSpr.setPivot(240, 240);
+    baroHpaSpr.pushRotated(&canvas, RA_BaroHpaAngle.getAverage());
 
     mainGaugeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
 
@@ -180,8 +191,8 @@ void MF_ALT::drawRightGauge()
     // Draw right half
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240 - x_offset, 240);
-    baroSpr.setPivot(240, 240);
-    baroSpr.pushRotated(&canvas, RA_BaroAngle.getAverage());
+    baroInHgSpr.setPivot(240, 240);
+    baroInHgSpr.pushRotated(&canvas, RA_BaroAngle.getAverage());
 
     mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
 

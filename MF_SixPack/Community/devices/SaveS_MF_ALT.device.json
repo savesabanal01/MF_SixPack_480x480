@@ -9,7 +9,9 @@
     },
     "Config": {
       "Pins": [
-        "Dummy_PIN"
+        "Pin 1",
+        "Pin 2",
+        "Pin 3"
       ],
       "isI2C": false
     },
