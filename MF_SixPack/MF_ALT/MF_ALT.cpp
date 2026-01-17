@@ -126,6 +126,7 @@ void MF_ALT::update()
     if (ALTMessageID == -1 || powerSaveFlag == true)  // Mobiflight Connector has stopped or entered power save mode
     {
         lcd.fillScreen(TFT_BLACK);
+        canvas.fillSprite(TFT_BLACK);
         analogWrite(BACKLIGHT_PIN, 0);
     }
     else
@@ -152,7 +153,7 @@ void MF_ALT::drawGauge()
     baroAngle = scaleValue(baro, 28.2, 31.6, 170, -170);
     RA_BaroAngle.addValue(baroAngle);
     
-    baroHpaAngle = scaleValue(baro, 925, 1095, 170, -170);
+    baroHpaAngle = scaleValue(baroHpa, 925, 1095, 170, -170);
     RA_BaroHpaAngle.addValue(baroHpaAngle);
 
     drawLeftGauge();
