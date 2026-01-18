@@ -5,6 +5,7 @@
 #include "Common_Bezel.h"
 #include "RunningAverage.h"
 #include "LCDBrightnessTable.h"
+#include "runningAngle.h"
 
 #define BACKGROUND_COLOR  0x1041
 
@@ -15,8 +16,10 @@ static LGFX_Sprite mainGaugeSpr(&canvas);
 static LGFX_Sprite needleSpr(&canvas);
 static LGFX_Sprite bezelSpr(&canvas);
 
-RunningAverage RA_Heading(5);
-RunningAverage RA_HeadingBug(5);
+runningAngle RA_Heading(runningAngle::DEGREES);
+runningAngle RA_HeadingBug(runningAngle::DEGREES);
+// RunningAverage RA_Heading(5);
+// RunningAverage RA_HeadingBug(5);
 
 int HIMessageID = -1;
 
@@ -54,8 +57,8 @@ void MF_HI::attach(uint16_t Pin3, char *init)
     bezelSpr.setBuffer(const_cast<std::uint16_t *>(Common_Bezel), COMMON_BEZEL_WIDTH, COMMON_BEZEL_HEIGHT, 16);
     needleSpr.setBuffer(const_cast<std::uint16_t *>(HI_Needle), HI_NEEDLE_WIDTH, HI_NEEDLE_HEIGHT, 16);
 
-    RA_Heading.clear();
-    RA_HeadingBug.clear();
+    RA_Heading.reset();
+    RA_HeadingBug.reset();
 }
 
 void MF_HI::detach()
@@ -114,9 +117,21 @@ void MF_HI::set(int16_t messageID, char *setPoint)
 void MF_HI::update()
 {
     // Do something which is required regulary
-    // RA_Heading.addValue(heading);
-    // RA_HeadingBug.addValue(headingBug);
-    // Do something which is required regulary
+    RA_Heading.add(heading);
+    RA_HeadingBug.add(headingBug);
+
+    headingAverage = RA_Heading.getAverage();
+    if(headingAverage < 0)
+    {
+        headingAverage += 360;
+    }
+
+    headingBugAverage = RA_HeadingBug.getAverage();
+    if (headingBugAverage < 0)
+    {
+        headingBugAverage += 360;
+    }
+
     if (HIMessageID == -1 || powerSaveFlag == true)  // Mobiflight Connector has stopped or entered power save mode
     {
         lcd.fillScreen(TFT_BLACK);
@@ -152,10 +167,10 @@ void MF_HI::drawLeftGauge()
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240, 240);
     headingTapeSpr.setPivot(240, 240);
-    headingTapeSpr.pushRotated(&canvas, heading, BACKGROUND_COLOR);
+    headingTapeSpr.pushRotated(&canvas, -headingAverage, BACKGROUND_COLOR);
     mainGaugeSpr.pushSprite(&canvas, 90, 90, BACKGROUND_COLOR);
-    needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 227);
-    needleSpr.pushRotated(&canvas, -heading + headingBug, BACKGROUND_COLOR);
+    needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 225);
+    needleSpr.pushRotated(&canvas, -headingAverage + headingBugAverage, BACKGROUND_COLOR);
     bezelSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, 0, 0);
 
@@ -167,10 +182,10 @@ void MF_HI::drawRightGauge()
     canvas.fillScreen(TFT_BLACK);
     headingTapeSpr.setPivot(240, 240);
     canvas.setPivot(240 - x_offset, 240);
-    headingTapeSpr.pushRotated(&canvas, -heading, BACKGROUND_COLOR);
+    headingTapeSpr.pushRotated(&canvas, -headingAverage, BACKGROUND_COLOR);
     mainGaugeSpr.pushSprite(&canvas, 90 - x_offset, 90, BACKGROUND_COLOR);
-    needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 227);
-    needleSpr.pushRotated(&canvas, -heading + headingBug, BACKGROUND_COLOR);
+    needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 225);
+    needleSpr.pushRotated(&canvas, -headingAverage + headingBugAverage, BACKGROUND_COLOR);
 
     bezelSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, x_offset, 0);

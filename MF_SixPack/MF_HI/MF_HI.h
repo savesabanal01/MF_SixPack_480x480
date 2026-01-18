@@ -27,6 +27,8 @@ private:
     uint8_t instrumentBrightness = 255;
 
     uint16_t BACKLIGHT_PIN = 38;
+    float headingAverage = 0;
+    float headingBugAverage = 0;
 
     // Functions
     float scaleValue(float x, float in_min, float in_max, float out_min, float out_max);
