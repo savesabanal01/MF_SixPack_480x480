@@ -18,7 +18,7 @@ static LGFX_Sprite bezelSpr(&canvas);
 RunningAverage RA_Heading(5);
 RunningAverage RA_HeadingBug(5);
 
-uint16_t HIMessageID = -100;
+int HIMessageID = -1;
 
 /* **********************************************************************************
     This is just the basic code to set up your custom device.
@@ -44,7 +44,7 @@ void MF_HI::attach(uint16_t Pin3, char *init)
 
     lcd.setRotation(3);
 
-    lcd.fillScreen(TFT_RED);
+    lcd.fillScreen(TFT_BLACK);
     lcd.setFont(&fonts::Font4);
     delay(1000);
 
@@ -103,7 +103,7 @@ void MF_HI::set(int16_t messageID, char *setPoint)
         break;
    case 100:
         /* code */
-        setInstrumentBrightness(atoi(setPoint));
+        setInstrumentBrightness(atof(setPoint));
         break;
     default:
         break;
@@ -114,12 +114,13 @@ void MF_HI::set(int16_t messageID, char *setPoint)
 void MF_HI::update()
 {
     // Do something which is required regulary
-    RA_Heading.addValue(heading);
-    RA_HeadingBug.addValue(headingBug);
+    // RA_Heading.addValue(heading);
+    // RA_HeadingBug.addValue(headingBug);
     // Do something which is required regulary
     if (HIMessageID == -1 || powerSaveFlag == true)  // Mobiflight Connector has stopped or entered power save mode
     {
         lcd.fillScreen(TFT_BLACK);
+        canvas.fillSprite(TFT_BLACK);
         analogWrite(BACKLIGHT_PIN, 0);
     }
     else
@@ -129,12 +130,15 @@ void MF_HI::update()
         analogWrite(BACKLIGHT_PIN, pwmOutput);
         drawGauge();
     }
+    // lcd.setTextColor(TFT_GREEN);
+    // // canvas.setTextFont(7);
+    // lcd.setTextSize(1);
+    // lcd.setCursor(100, 100);
+    // lcd.println(String(HIMessageID));
 }
 
 void MF_HI::drawGauge()
 {
-    // VSIAngle = scaleValue(verticalSpeed, -2000, 2000, -170, 170); // The needle starts at -90 degrees
-
     canvas.fillScreen(TFT_BLACK);
 
     drawLeftGauge();
@@ -147,12 +151,11 @@ void MF_HI::drawLeftGauge()
 
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240, 240);
-
     headingTapeSpr.setPivot(240, 240);
-    headingTapeSpr.pushRotated(&canvas, RA_Heading.getAverage(), BACKGROUND_COLOR);
+    headingTapeSpr.pushRotated(&canvas, heading, BACKGROUND_COLOR);
     mainGaugeSpr.pushSprite(&canvas, 90, 90, BACKGROUND_COLOR);
-    needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 235);
-    needleSpr.pushRotated(&canvas, RA_HeadingBug.getAverage(), BACKGROUND_COLOR);
+    needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 227);
+    needleSpr.pushRotated(&canvas, -heading + headingBug, BACKGROUND_COLOR);
     bezelSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, 0, 0);
 
@@ -164,10 +167,11 @@ void MF_HI::drawRightGauge()
     canvas.fillScreen(TFT_BLACK);
     headingTapeSpr.setPivot(240, 240);
     canvas.setPivot(240 - x_offset, 240);
-    headingTapeSpr.pushRotated(&canvas, RA_Heading.getAverage(), BACKGROUND_COLOR);
+    headingTapeSpr.pushRotated(&canvas, -heading, BACKGROUND_COLOR);
     mainGaugeSpr.pushSprite(&canvas, 90 - x_offset, 90, BACKGROUND_COLOR);
-    needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 235);
-    needleSpr.pushRotated(&canvas, RA_HeadingBug.getAverage(), BACKGROUND_COLOR);
+    needleSpr.setPivot(HI_NEEDLE_WIDTH/2, 227);
+    needleSpr.pushRotated(&canvas, -heading + headingBug, BACKGROUND_COLOR);
+
     bezelSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, x_offset, 0);
 }
@@ -188,9 +192,13 @@ void MF_HI::setPowerSave(bool enabled)
     powerSaveFlag = enabled;
 }
 
-void MF_HI::setInstrumentBrightness(uint8_t value)
+void MF_HI::setInstrumentBrightness(float value)
 {
-    instrumentBrightness = value;
+    float pwmOutput = 0;
+
+    instrumentBrightness = scaleValue(value, 0, 1, 100, 255);
+    pwmOutput = CIE_LIGHTNESS_TO_PWM_LUT_256_IN_8BIT_OUT[(int)instrumentBrightness]; // needed to correct PWM output due to human eye brightness perception
+    analogWrite(BACKLIGHT_PIN, pwmOutput);
 }
 
 // Scale Function

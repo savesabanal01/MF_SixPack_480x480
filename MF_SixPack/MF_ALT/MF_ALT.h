@@ -48,5 +48,5 @@ private:
     void setAltitude(float value);    // angle for heading
     void setBaro(float value); // angle for heading bug
     void setPowerSave(bool enabed);
-    void setInstrumentBrightness(uint8_t value);
+    void setInstrumentBrightness(float value);
 };

@@ -36,5 +36,5 @@ private:
     void setHeading(float value);    // angle for heading
     void setHeadingBug(float value); // angle for heading bug
     void setPowerSave(bool enabled);
-    void setInstrumentBrightness(uint8_t value);
+    void setInstrumentBrightness(float value);
 };

@@ -14,10 +14,10 @@ static LGFX_Sprite needleSpr(&canvas);
 
 #define BACKGROUND_COLOR  0x1041
 
-RunningAverage RA_AirspeedAngle(5);
-RunningAverage RA_TASKnobAngle(5);
+RunningAverage RA_Airspeed(5);
+RunningAverage RA_TASKnob(5);
 
-uint16_t ASIMessageID = -100;
+int ASIMessageID = -1;
 
 /* **********************************************************************************
     This is just the basic code to set up your custom device.
@@ -53,8 +53,8 @@ void MF_ASI::attach(uint16_t Pin3, char *init)
     labelsSpr.setBuffer(const_cast<std::uint16_t *>(ASI_Labels), ASI_LABELS_WIDTH, ASI_LABELS_HEIGHT, 16);
     needleSpr.setBuffer(const_cast<std::uint16_t *>(ASI_Needle), ASI_NEEDLE_WIDTH, ASI_NEEDLE_HEIGHT, 16);
 
-    RA_AirspeedAngle.clear();
-    RA_TASKnobAngle.clear();
+    RA_Airspeed.clear();
+    RA_TASKnob.clear();
 }
 
 void MF_ASI::detach()
@@ -122,7 +122,7 @@ void MF_ASI::set(int16_t messageID, char *setPoint)
         break;
     case 100:
         /* code */
-        setInstrumentBrightness(atoi(setPoint));
+        setInstrumentBrightness(atof(setPoint));
         break;
     default:
         break;
@@ -132,6 +132,7 @@ void MF_ASI::set(int16_t messageID, char *setPoint)
 
 void MF_ASI::update()
 {
+    float pwmOutput = 0;
     // Do something which is required regulary
     if (ASIMessageID == -1 || powerSaveFlag == true)  // Mobiflight Connector has stopped or entered power save mode
     {
@@ -140,20 +141,26 @@ void MF_ASI::update()
     }
     else
     {
-        float pwmOutput = 0;
+
         pwmOutput = CIE_LIGHTNESS_TO_PWM_LUT_256_IN_8BIT_OUT[(int)instrumentBrightness]; // needed to correct PWM output due to human eye brightness perception
         analogWrite(BACKLIGHT_PIN, pwmOutput);
         drawGauge();
     }
+    // lcd.setTextColor(TFT_GREEN);
+    // // canvas.setTextFont(7);
+    // lcd.setTextSize(1);
+    // lcd.setCursor(100, 100);
+    // lcd.println(String(pwmOutput));
 }
 
 void MF_ASI::drawGauge()
 {
-    rawAngle = calculateAngle(airSpeedFromSim);
-    RA_AirspeedAngle.addValue(rawAngle);
+    RA_Airspeed.addValue(airSpeedFromSim);
+    rawAngle = calculateAngle(RA_Airspeed.getAverage());
 
-    TASangle = scaleValue(TASRatio, -1, 1, 15, -95);
-    RA_TASKnobAngle.addValue(TASangle);
+    RA_TASKnob.addValue(TASRatio);
+    TASangle = scaleValue(RA_TASKnob.getAverage(), -1, 1, 15, -95);
+
 
     whiteArcStartAngle = calculateAngle(V_S1);
     whiteArcEndAngle = calculateAngle(V_FE);
@@ -181,7 +188,7 @@ void MF_ASI::drawLeftGauge()
     // Draw left half
     numberTapeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
     numberTapeSpr.setPivot(240, 240);
-    numberTapeSpr.pushRotated(&canvas, RA_TASKnobAngle.getAverage(), BACKGROUND_COLOR);
+    numberTapeSpr.pushRotated(&canvas, TASangle, BACKGROUND_COLOR);
     mainGaugeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
 
     // Draw White Arc
@@ -201,7 +208,7 @@ void MF_ASI::drawLeftGauge()
     labelsSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
 
     // Finally, draw the needle
-    needleSpr.pushRotated(&canvas, RA_AirspeedAngle.getAverage(), BACKGROUND_COLOR);
+    needleSpr.pushRotated(&canvas, rawAngle, BACKGROUND_COLOR);
     canvas.pushSprite(&lcd, 0, 0);
 }
 
@@ -211,7 +218,7 @@ void MF_ASI::drawRightGauge()
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240 - x_offset, 240);
     needleSpr.setPivot(ASI_NEEDLE_WIDTH / 2, 240);
-    numberTapeSpr.pushRotated(&canvas, RA_TASKnobAngle.getAverage(), BACKGROUND_COLOR);
+    numberTapeSpr.pushRotated(&canvas, TASangle, BACKGROUND_COLOR);
     mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
 
     // Draw White Arc
@@ -225,7 +232,7 @@ void MF_ASI::drawRightGauge()
     // Draw the labels
     labelsSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
     // Finally, draw the needle
-    needleSpr.pushRotated(&canvas, RA_AirspeedAngle.getAverage(), BACKGROUND_COLOR);
+    needleSpr.pushRotated(&canvas, rawAngle, BACKGROUND_COLOR);
 
     // Push the canvas sprite to the lcd screen
     canvas.pushSprite(&lcd, x_offset, 0);
@@ -310,9 +317,13 @@ void MF_ASI::setVNE(float value)
     V_NE = value;
 }
 
-void MF_ASI::setInstrumentBrightness(uint8_t value)
+void MF_ASI::setInstrumentBrightness(float value)
 {
-    instrumentBrightness = value;
+    float pwmOutput = 0;
+
+    instrumentBrightness = scaleValue(value, 0, 1, 100, 255);
+    pwmOutput = CIE_LIGHTNESS_TO_PWM_LUT_256_IN_8BIT_OUT[(int)instrumentBrightness]; // needed to correct PWM output due to human eye brightness perception
+    analogWrite(BACKLIGHT_PIN, pwmOutput);
 }
 
 void MF_ASI::setPowerSave(bool enabled)

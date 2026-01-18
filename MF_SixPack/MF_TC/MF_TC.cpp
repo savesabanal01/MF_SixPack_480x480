@@ -19,7 +19,7 @@ static LGFX_Sprite bezelSpr(&canvas);
 RunningAverage RA_TurnAngle(5);
 RunningAverage RA_SlipAngle(5);
 
-uint16_t TCMessageID = -100;
+int TCMessageID = -1;
 
 /* **********************************************************************************
     This is just the basic code to set up your custom device.
@@ -45,7 +45,7 @@ void MF_TC::attach(uint16_t Pin3, char *init)
 
     lcd.setRotation(3);
 
-    lcd.fillScreen(TFT_GREEN);
+    lcd.fillScreen(TFT_BLACK);
     lcd.setFont(&fonts::Font4);
     delay(1000);
 
@@ -102,7 +102,7 @@ void MF_TC::set(int16_t messageID, char *setPoint)
         break;
     case 100:
         /* code */
-        setInstrumentBrightness(atoi(setPoint));
+        setInstrumentBrightness(atof(setPoint));
         break;
     default:
         break;
@@ -186,9 +186,13 @@ void MF_TC::setPowerSave(bool enabled)
     powerSaveFlag = enabled;  
 }
 
-void MF_TC::setInstrumentBrightness(uint8_t value)
+void MF_TC::setInstrumentBrightness(float value)
 {
-    instrumentBrightness = value;
+    uint8_t pwmOutput = 0;
+
+    instrumentBrightness = scaleValue(value, 0, 1, 100, 255);
+    pwmOutput = CIE_LIGHTNESS_TO_PWM_LUT_256_IN_8BIT_OUT[(int)instrumentBrightness]; // needed to correct PWM output due to human eye brightness perception
+    analogWrite(BACKLIGHT_PIN, pwmOutput);
 }
 
 // Scale Function

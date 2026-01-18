@@ -40,5 +40,5 @@ private:
     void setTurnAngle(float value);
     void setSlipAngle (float value);
     void setPowerSave(bool enabled);
-    void setInstrumentBrightness(uint8_t value);
+    void setInstrumentBrightness(float value);
 };

@@ -19,11 +19,10 @@ public:
 private:
     bool    _initialised;
     uint8_t _pin1, _pin2, _pin3;
- // Variables
 
+ // Variables
     float rawAngle = 0;
     float angle = 0;
-    // double encoder = -1;
     float TASangle = 0;
     uint16_t x_offset = 240;
     float startTIme = 0;
@@ -37,7 +36,6 @@ private:
     uint16_t V_S0 = 48;
     uint16_t V_S1 = 40;
     uint16_t V_FE = 85;
-    // uint16_t V_FE = 50;
     uint16_t V_NO = 129;
     uint16_t V_NE = 163;
 
@@ -66,5 +64,5 @@ private:
     void setVNO(float value);
     void setVNE(float value);
     void setPowerSave(bool enabled);
-    void setInstrumentBrightness(uint8_t value);
+    void setInstrumentBrightness(float value);
 };

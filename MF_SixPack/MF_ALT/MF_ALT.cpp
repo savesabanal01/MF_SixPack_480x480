@@ -4,6 +4,7 @@
 #include "4inchLCDConfig_Guition.h"
 #include "LCDBrightnessTable.h"
 #include "RunningAverage.h"
+#include "math.h"
 
 #define BACKGROUND_COLOR  0x1041
 
@@ -19,11 +20,11 @@ static LGFX_Sprite needle100Spr(&canvas);
 static LGFX_Sprite needle1000Spr(&canvas);
 static LGFX_Sprite needle10000Spr(&canvas);
 
-uint16_t ALTMessageID = -100;
+int ALTMessageID = -1;
 
 RunningAverage RA_Altitude(5);
-RunningAverage RA_BaroAngle(5);
-RunningAverage RA_BaroHpaAngle(5);
+RunningAverage RA_Baro(5);
+RunningAverage RA_BaroHpa(5);
 
 
 /* **********************************************************************************
@@ -50,7 +51,7 @@ void MF_ALT::attach(uint16_t Pin3, char *init)
 
     lcd.setRotation(3);
 
-    lcd.fillScreen(TFT_RED);
+    lcd.fillScreen(TFT_BLACK);
     delay(1000);
     lcd.setFont(&fonts::Font4);
 
@@ -64,7 +65,8 @@ void MF_ALT::attach(uint16_t Pin3, char *init)
     needle10000Spr.setBuffer(const_cast<std::uint16_t *>(ALT_Needle_10000), ALT_NEEDLE_10000_WIDTH, ALT_NEEDLE_10000_HEIGHT, 16);
 
     RA_Altitude.clear();
-    RA_BaroAngle.clear();
+    RA_Baro.clear();
+    RA_BaroHpa.clear();
 
 }
 
@@ -104,6 +106,7 @@ void MF_ALT::set(int16_t messageID, char *setPoint)
         break;
     case -2:
         // tbd., get's called when PowerSavingMode is entered
+        setPowerSave(atoi(setPoint));
         break;
     case 0:
         setAltitude(atof(setPoint));
@@ -112,8 +115,9 @@ void MF_ALT::set(int16_t messageID, char *setPoint)
         /* code */
         setBaro(atof(setPoint));
         break;
-    case 2:
+    case 100:
         /* code */
+        setInstrumentBrightness(atof(setPoint));
         break;
     default:
         break;
@@ -144,20 +148,26 @@ void MF_ALT::drawGauge()
 
     RA_Altitude.addValue(altitude);
     canvas.fillScreen(TFT_BLACK);
-    thousand = (int)RA_Altitude.getAverage() % 10000;
-    hundred = (int)RA_Altitude.getAverage() % 1000;
+    thousand = fmod(RA_Altitude.getAverage(), 10000);
+    hundred = fmod(RA_Altitude.getAverage(), 1000);
     needle10000Angle = scaleValue(RA_Altitude.getAverage(), 0, 100000, 0, 360);
     needle1000Angle = scaleValue(thousand, 0, 10000, 0, 360);
     needle100Angle = scaleValue(hundred, 0, 1000, 0, 360);
 
-    baroAngle = scaleValue(baro, 28.2, 31.6, 170, -170);
-    RA_BaroAngle.addValue(baroAngle);
-    
-    baroHpaAngle = scaleValue(baroHpa, 925, 1095, 170, -170);
-    RA_BaroHpaAngle.addValue(baroHpaAngle);
+    RA_Baro.addValue(baro);
+    baroAngle = scaleValue(RA_Baro.getAverage(), 28.2, 31.6, 170, -170);
+
+    RA_BaroHpa.addValue(baroHpa);
+    baroHpaAngle = scaleValue(RA_BaroHpa.getAverage(), 925, 1095, 170, -170);
+
 
     drawLeftGauge();
     drawRightGauge();
+    // lcd.setTextColor(TFT_GREEN);
+    // // canvas.setTextFont(7);
+    // lcd.setTextSize(1);
+    // lcd.setCursor(100, 100);
+    // lcd.println(String(instrumentBrightness));
 }
 
 void MF_ALT::drawLeftGauge()
@@ -168,7 +178,7 @@ void MF_ALT::drawLeftGauge()
     canvas.setPivot(240, 240);
 
     baroHpaSpr.setPivot(240, 240);
-    baroHpaSpr.pushRotated(&canvas, RA_BaroHpaAngle.getAverage());
+    baroHpaSpr.pushRotated(&canvas, baroHpaAngle);
 
     mainGaugeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
 
@@ -193,7 +203,7 @@ void MF_ALT::drawRightGauge()
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240 - x_offset, 240);
     baroInHgSpr.setPivot(240, 240);
-    baroInHgSpr.pushRotated(&canvas, RA_BaroAngle.getAverage());
+    baroInHgSpr.pushRotated(&canvas, baroAngle);
 
     mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
 
@@ -222,8 +232,21 @@ void MF_ALT::setBaro(float value)
     baro = value;
 }
 
-void setPowerSave(bool enabed);
-void setInstrumentBrightness(uint8_t value);
+void MF_ALT::setPowerSave(bool enabled)
+{
+    powerSaveFlag = enabled;
+}
+
+
+void MF_ALT::setInstrumentBrightness(float value)
+{
+    float pwmOutput = 0;
+
+    instrumentBrightness = scaleValue(value, 0, 1, 100, 255);
+    pwmOutput = CIE_LIGHTNESS_TO_PWM_LUT_256_IN_8BIT_OUT[(int)instrumentBrightness]; // needed to correct PWM output due to human eye brightness perception
+    analogWrite(BACKLIGHT_PIN, pwmOutput);
+}
+
 // Scale Function
 float MF_ALT::scaleValue(float x, float in_min, float in_max, float out_min, float out_max)
 {
