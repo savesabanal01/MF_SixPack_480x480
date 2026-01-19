@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MobiflightConnector>
+  <outputs>
+    <config guid="b4c62446-7530-43b1-ab4d-924e7a74af1e">
+      <active>true</active>
+      <description>Roll Rate</description>
+      <settings msdata:InstanceType="MobiFlight.OutputConfigItem, MFConnector, Version=10.5.3.0, Culture=neutral, PublicKeyToken=null" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <source type="XplaneDataRef" path="sim/cockpit2/gauges/indicators/turn_rate_roll_deg_pilot" />
+        <test type="Float" value="1" />
+        <modifiers />
+        <display type="CustomDevice" serial="MF_SixPack/ SN-CCBA971F2E0C" trigger="normal" customType="" customName="Turn Coordinator" messageType="0" value="$" />
+        <preconditions />
+        <configrefs />
+      </settings>
+    </config>
+    <config guid="d7376a09-dce3-413c-a23d-8a8cfa013014">
+      <active>true</active>
+      <description>Slip Degree</description>
+      <settings msdata:InstanceType="MobiFlight.OutputConfigItem, MFConnector, Version=10.5.3.0, Culture=neutral, PublicKeyToken=null" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <source type="XplaneDataRef" path="sim/cockpit2/gauges/indicators/slip_deg" />
+        <test type="Float" value="1" />
+        <modifiers />
+        <display type="CustomDevice" serial="MF_SixPack/ SN-CCBA971F2E0C" trigger="normal" customType="" customName="Turn Coordinator" messageType="1" value="$" />
+        <preconditions />
+        <configrefs />
+      </settings>
+    </config>
+    <config guid="706101f7-573c-404a-8e38-2ab8a57d52b8">
+      <active>true</active>
+      <description>TC Instrument Brightness</description>
+      <settings msdata:InstanceType="MobiFlight.OutputConfigItem, MFConnector, Version=10.5.3.0, Culture=neutral, PublicKeyToken=null" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <source type="XplaneDataRef" path="sim/cockpit/electrical/instrument_brightness" />
+        <test type="Float" value="1" />
+        <modifiers />
+        <display type="CustomDevice" serial="MF_SixPack/ SN-CCBA971F2E0C" trigger="normal" customType="" customName="Turn Coordinator" messageType="100" value="$" />
+        <preconditions />
+        <configrefs />
+      </settings>
+    </config>
+  </outputs>
+  <inputs>
+    <config guid="d1915960-1e38-463b-ae5c-b2eb4a7cdcb3">
+      <active>true</active>
+      <description />
+    </config>
+  </inputs>
+</MobiflightConnector>

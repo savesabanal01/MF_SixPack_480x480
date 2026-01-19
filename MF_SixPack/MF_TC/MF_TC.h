@@ -24,6 +24,8 @@ private:
  // Variables
     float turnAngle = 0;
     float slipAngle = 0;
+    float turnAngleAverage = 0;
+    float slipAngleAverage = 0;
     int ballXPos = 0;
     float ballYPos = 0;
     uint16_t x_offset = 240;

@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MobiflightConnector>
+  <outputs>
+    <config guid="2a387fd3-2a13-415d-947a-c67e24b0c807">
+      <active>true</active>
+      <description>Heading</description>
+      <settings msdata:InstanceType="MobiFlight.OutputConfigItem, MFConnector, Version=10.5.3.0, Culture=neutral, PublicKeyToken=null" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <source type="XplaneDataRef" path="sim/cockpit2/gauges/indicators/heading_vacuum_deg_mag_pilot" />
+        <test type="Float" value="1" />
+        <modifiers />
+        <display type="CustomDevice" serial="MF_SixPack/ SN-CCBA971F2E0C" trigger="normal" customType="" customName="Heading Indicator" messageType="0" value="$" />
+        <preconditions />
+        <configrefs />
+      </settings>
+    </config>
+    <config guid="ed966c4e-37f6-43e5-aaa8-c1aeb4c4392c">
+      <active>true</active>
+      <description>Heading Bug</description>
+      <settings msdata:InstanceType="MobiFlight.OutputConfigItem, MFConnector, Version=10.5.3.0, Culture=neutral, PublicKeyToken=null" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <source type="XplaneDataRef" path="sim/cockpit2/autopilot/heading_dial_deg_mag_pilot" />
+        <test type="Float" value="1" />
+        <modifiers />
+        <display type="CustomDevice" serial="MF_SixPack/ SN-CCBA971F2E0C" trigger="normal" customType="" customName="Heading Indicator" messageType="1" value="$" />
+        <preconditions />
+        <configrefs />
+      </settings>
+    </config>
+    <config guid="04d4d544-b1fd-422c-9e6c-8f5cb02dedd3">
+      <active>true</active>
+      <description>HI Insrtrument Brightness</description>
+      <settings msdata:InstanceType="MobiFlight.OutputConfigItem, MFConnector, Version=10.5.3.0, Culture=neutral, PublicKeyToken=null" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <source type="XplaneDataRef" path="sim/cockpit/electrical/instrument_brightness" />
+        <test type="Float" value="1" />
+        <modifiers />
+        <display type="CustomDevice" serial="MF_SixPack/ SN-CCBA971F2E0C" trigger="normal" customType="" customName="Heading Indicator" messageType="100" value="$" />
+        <preconditions />
+        <configrefs />
+      </settings>
+    </config>
+  </outputs>
+  <inputs>
+    <config guid="0836211a-4f26-4c2b-a1a1-80408c1b3326">
+      <active>true</active>
+      <description>DG Sync Knob</description>
+      <settings msdata:InstanceType="MobiFlight.InputConfigItem, MFConnector, Version=10.5.3.0, Culture=neutral, PublicKeyToken=null" serial="MobiFlight RaspiPico/ SN-4250304B38353817" name="Left Encoder" type="Encoder" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <encoder>
+          <onLeft type="XplaneInputAction" inputType="Command" path="sim/instruments/DG_sync_up" expression="" />
+          <onLeftFast type="XplaneInputAction" inputType="Command" path="sim/instruments/DG_sync_up" expression="" />
+          <onRight type="XplaneInputAction" inputType="Command" path="sim/instruments/DG_sync_down" expression="" />
+          <onRightFast type="XplaneInputAction" inputType="Command" path="sim/instruments/DG_sync_down" expression="" />
+        </encoder>
+        <preconditions />
+        <configrefs />
+      </settings>
+    </config>
+    <config guid="2df839bd-4c75-4f38-8f43-e65a096cd8d9">
+      <active>true</active>
+      <description>Heading Bug Knob</description>
+      <settings msdata:InstanceType="MobiFlight.InputConfigItem, MFConnector, Version=10.5.3.0, Culture=neutral, PublicKeyToken=null" serial="MobiFlight RaspiPico/ SN-4250304B38353817" name="Right Encoder" type="Encoder" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <encoder>
+          <onLeft type="XplaneInputAction" inputType="Command" path="sim/autopilot/heading_down" expression="" />
+          <onLeftFast type="XplaneInputAction" inputType="Command" path="sim/autopilot/heading_down" expression="" />
+          <onRight type="XplaneInputAction" inputType="Command" path="sim/autopilot/heading_up" expression="" />
+          <onRightFast type="XplaneInputAction" inputType="Command" path="sim/autopilot/heading_up" expression="" />
+        </encoder>
+        <preconditions />
+        <configrefs />
+      </settings>
+    </config>
+  </inputs>
+</MobiflightConnector>

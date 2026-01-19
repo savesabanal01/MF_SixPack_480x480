@@ -55,6 +55,9 @@ void MF_TC::attach(uint16_t Pin3, char *init)
     planeSpr.setBuffer(const_cast<std::uint16_t *>(TC_Plane), TC_PLANE_WIDTH, TC_PLANE_HEIGHT, 16);
     ballSpr.setBuffer(const_cast<std::uint16_t *>(TC_Ball), TC_BALL_WIDTH, TC_BALL_HEIGHT, 16);
     markerSpr.setBuffer(const_cast<std::uint16_t *>(TC_Marker), TC_MARKER_WIDTH, TC_MARKER_HEIGHT, 16);
+
+    RA_TurnAngle.clear();
+    RA_SlipAngle.clear();
 }
 
 void MF_TC::detach()
@@ -132,8 +135,11 @@ void MF_TC::drawGauge()
     RA_TurnAngle.addValue(turnAngle);
     RA_SlipAngle.addValue(slipAngle);
 
+    turnAngleAverage = RA_TurnAngle.getAverage();
+    slipAngleAverage = RA_SlipAngle.getAverage();
+
     canvas.fillScreen(TFT_BLACK);
-    ballXPos = (int)round(scaleValue(RA_SlipAngle.getAverage(), 8, -8, 120, 360 - TC_BALL_WIDTH));
+    ballXPos = (int)round(scaleValue(slipAngleAverage, 8, -8, 120, 360 - TC_BALL_WIDTH));
     ballYPos = 260 + (int)(56 * sqrt((1 - (((ballXPos - 190) * (ballXPos - 190) / (190 * 190)))))); // Approximation based on Ellipse equation
     drawLeftGauge();
     drawRightGauge();
@@ -148,7 +154,7 @@ void MF_TC::drawLeftGauge()
 
     mainGaugeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
     planeSpr.setPivot(TC_PLANE_WIDTH / 2, 56);
-    planeSpr.pushRotated(&canvas, RA_TurnAngle.getAverage(), BACKGROUND_COLOR);
+    planeSpr.pushRotated(&canvas, turnAngleAverage, BACKGROUND_COLOR);
     ballSpr.pushSprite(&canvas, ballXPos, ballYPos, BACKGROUND_COLOR);
     markerSpr.pushSprite(&canvas, 208, 313, BACKGROUND_COLOR);
     bezelSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
@@ -163,7 +169,7 @@ void MF_TC::drawRightGauge()
   canvas.setPivot(240 - x_offset, 256);
   mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
   planeSpr.setPivot(TC_PLANE_WIDTH / 2, 56);
-  planeSpr.pushRotated(&canvas, RA_TurnAngle.getAverage(), BACKGROUND_COLOR);
+  planeSpr.pushRotated(&canvas, turnAngleAverage, BACKGROUND_COLOR);
   ballSpr.pushSprite(&canvas, ballXPos - x_offset, ballYPos, BACKGROUND_COLOR);
   markerSpr.pushSprite(&canvas, 208 - x_offset, 313, BACKGROUND_COLOR);
   bezelSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);

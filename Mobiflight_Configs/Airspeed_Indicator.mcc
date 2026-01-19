@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MobiflightConnector>
+  <outputs>
+    <config guid="0ec7c22c-1fd4-41a0-a6b6-433cb620f33c">
+      <active>true</active>
+      <description>Airspeed</description>
+      <settings msdata:InstanceType="MobiFlight.OutputConfigItem, MFConnector, Version=10.5.3.0, Culture=neutral, PublicKeyToken=null" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <source type="XplaneDataRef" path="sim/cockpit2/gauges/indicators/airspeed_kts_pilot" />
+        <test type="Float" value="1" />
+        <modifiers />
+        <display type="CustomDevice" serial="MF_SixPack/ SN-CCBA971F2E0C" trigger="normal" customType="" customName="Airspeed Indicator" messageType="0" value="$" />
+        <preconditions />
+        <configrefs />
+      </settings>
+    </config>
+    <config guid="fad4c7ea-e181-4936-973e-76d372fafa43">
+      <active>true</active>
+      <description>TAS Knob Value</description>
+      <settings msdata:InstanceType="MobiFlight.OutputConfigItem, MFConnector, Version=10.5.3.0, Culture=neutral, PublicKeyToken=null" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <source type="XplaneDataRef" path="laminar/c172/knob_TAS" />
+        <test type="Float" value="1" />
+        <modifiers />
+        <display type="CustomDevice" serial="MF_SixPack/ SN-CCBA971F2E0C" trigger="normal" customType="" customName="Airspeed Indicator" messageType="1" value="$" />
+        <preconditions />
+        <configrefs />
+      </settings>
+    </config>
+    <config guid="6ec5055e-942b-4676-8458-c088f2cf0f72">
+      <active>true</active>
+      <description>ASI Instrument Brightness</description>
+      <settings msdata:InstanceType="MobiFlight.OutputConfigItem, MFConnector, Version=10.5.3.0, Culture=neutral, PublicKeyToken=null" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <source type="XplaneDataRef" path="sim/cockpit/electrical/instrument_brightness" />
+        <test type="Float" value="1" />
+        <modifiers />
+        <display type="CustomDevice" serial="MF_SixPack/ SN-CCBA971F2E0C" trigger="normal" customType="" customName="Airspeed Indicator" messageType="100" value="$" />
+        <preconditions />
+        <configrefs />
+      </settings>
+    </config>
+  </outputs>
+  <inputs>
+    <config guid="794f98e2-5ef0-4519-81d4-10afeb40e033">
+      <active>true</active>
+      <description>TAS Knob Encoder</description>
+      <settings msdata:InstanceType="MobiFlight.InputConfigItem, MFConnector, Version=10.5.3.0, Culture=neutral, PublicKeyToken=null" serial="MobiFlight RaspiPico/ SN-4250304B38353817" name="Left Encoder" type="Encoder" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <encoder>
+          <onLeft type="XplaneInputAction" inputType="DataRef" path="laminar/c172/knob_TAS" expression="if($ &gt; -1, $ - 0.01, -1)" />
+          <onLeftFast type="XplaneInputAction" inputType="DataRef" path="laminar/c172/knob_TAS" expression="if($ &gt; -1, $ - 0.05, -1)" />
+          <onRight type="XplaneInputAction" inputType="DataRef" path="laminar/c172/knob_TAS" expression="if($ &lt; 1, $ + 0.01, 1)" />
+          <onRightFast type="XplaneInputAction" inputType="DataRef" path="laminar/c172/knob_TAS" expression="if($ &lt; 1, $ + 0.05, 1)" />
+        </encoder>
+        <preconditions />
+        <configrefs />
+      </settings>
+    </config>
+  </inputs>
+</MobiflightConnector>
