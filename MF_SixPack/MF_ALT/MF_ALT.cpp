@@ -22,6 +22,8 @@ static LGFX_Sprite needle10000Spr(&canvas);
 
 int ALTMessageID = -1;
 
+bool updateFromSimFlag = true;
+
 RunningAverage RA_Altitude(5);
 RunningAverage RA_Baro(5);
 RunningAverage RA_BaroHpa(5);
@@ -32,10 +34,8 @@ RunningAverage RA_BaroHpa(5);
     Change/add your code as needed.
 ********************************************************************************** */
 
-MF_ALT::MF_ALT(uint8_t Pin1, uint8_t Pin2)
+MF_ALT::MF_ALT()
 {
-    _pin1 = Pin1;
-    _pin2 = Pin2;
 }
 
 void MF_ALT::begin()
@@ -43,9 +43,10 @@ void MF_ALT::begin()
 
 }
 
-void MF_ALT::attach(uint16_t Pin3, char *init)
+// void MF_ALT::attach(uint16_t Pin3, char *init)
+void MF_ALT::attach()
 {
-    _pin3 = Pin3;
+    // _pin3 = Pin3;
     lcd.init();
     lcd.setFont(&fonts::Font4);
 
@@ -76,14 +77,14 @@ void MF_ALT::detach()
     if (!_initialised)
         return;
     _initialised = false;
-    canvas.deleteSprite();
-    mainGaugeSpr.deleteSprite();
-    bezelSpr.deleteSprite();
-    baroInHgSpr.deleteSprite();
-    needle100Spr.deleteSprite();
-    needle1000Spr.deleteSprite();
-    needle10000Spr.deleteSprite();
-    lcd.endWrite();
+    // canvas.deleteSprite();
+    // mainGaugeSpr.deleteSprite();
+    // bezelSpr.deleteSprite();
+    // baroInHgSpr.deleteSprite();
+    // needle100Spr.deleteSprite();
+    // needle1000Spr.deleteSprite();
+    // needle10000Spr.deleteSprite();
+    // lcd.endWrite();
 }
 
 void MF_ALT::set(int16_t messageID, char *setPoint)
@@ -122,11 +123,15 @@ void MF_ALT::set(int16_t messageID, char *setPoint)
     default:
         break;
     }
+
+    updateFromSimFlag = true;
+
 }
 
 void MF_ALT::update()
 {
-    // Do something which is required regulary
+        // Do something which is required regulary
+
     if (ALTMessageID == -1 || powerSaveFlag == true)  // Mobiflight Connector has stopped or entered power save mode
     {
         lcd.fillScreen(TFT_BLACK);
@@ -138,8 +143,13 @@ void MF_ALT::update()
         float pwmOutput = 0;
         pwmOutput = CIE_LIGHTNESS_TO_PWM_LUT_256_IN_8BIT_OUT[(int)instrumentBrightness]; // needed to correct PWM output due to human eye brightness perception
         analogWrite(BACKLIGHT_PIN, pwmOutput);
-        drawGauge();
+        if (updateFromSimFlag == true) // draw gauge only if something was updated from the sim, if not, skip to improve performance
+        {
+            drawGauge();
+            updateFromSimFlag = false;
+        }
     }
+
 }
 
 void MF_ALT::drawGauge()
@@ -163,37 +173,44 @@ void MF_ALT::drawGauge()
 
     drawLeftGauge();
     drawRightGauge();
-    // lcd.setTextColor(TFT_GREEN);
-    // // canvas.setTextFont(7);
-    // lcd.setTextSize(1);
-    // lcd.setCursor(100, 100);
-    // lcd.println(String(instrumentBrightness));
+    lcd.setTextColor(TFT_GREEN);
+    // canvas.setTextFont(7);
+    lcd.setTextSize(1);
+    lcd.setCursor(100, 100);
+    lcd.println(String(instrumentBrightness));
 }
 
 void MF_ALT::drawLeftGauge()
 {
-    // Draw Left Half of VSI Gauge
+    // // Draw Left Half of VSI Gauge
 
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240, 240);
 
     baroHpaSpr.setPivot(240, 240);
     baroHpaSpr.pushRotated(&canvas, baroHpaAngle);
+    
 
     mainGaugeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
+    
 
     needle10000Spr.setPivot(ALT_NEEDLE_10000_WIDTH / 2, 233);
     needle10000Spr.pushRotated(&canvas, needle10000Angle, BACKGROUND_COLOR);
+    
 
     needle1000Spr.setPivot(ALT_NEEDLE_1000_WIDTH / 2, 133);
     needle1000Spr.pushRotated(&canvas, needle1000Angle, BACKGROUND_COLOR);
+    
 
     needle100Spr.setPivot(ALT_NEEDLE_100_WIDTH / 2, 221);
     needle100Spr.pushRotated(&canvas, needle100Angle, BACKGROUND_COLOR);
+    
 
     bezelSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
+    
 
     canvas.pushSprite(&lcd, 0, 0);
+    
 
 }
 
@@ -204,21 +221,28 @@ void MF_ALT::drawRightGauge()
     canvas.setPivot(240 - x_offset, 240);
     baroInHgSpr.setPivot(240, 240);
     baroInHgSpr.pushRotated(&canvas, baroAngle);
+    
 
     mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
+    
 
     needle10000Spr.setPivot(ALT_NEEDLE_10000_WIDTH / 2, 233);
     needle10000Spr.pushRotated(&canvas, needle10000Angle, BACKGROUND_COLOR);
+    
 
     needle1000Spr.setPivot(ALT_NEEDLE_1000_WIDTH / 2, 133);
     needle1000Spr.pushRotated(&canvas, needle1000Angle, BACKGROUND_COLOR);
+    
 
     needle100Spr.setPivot(ALT_NEEDLE_100_WIDTH / 2, 221);
     needle100Spr.pushRotated(&canvas, needle100Angle, BACKGROUND_COLOR);
+    
 
     bezelSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
+    
 
     canvas.pushSprite(&lcd, x_offset, 0);
+    
 }
 
 // Setters

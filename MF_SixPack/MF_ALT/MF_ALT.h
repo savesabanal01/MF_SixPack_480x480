@@ -13,9 +13,9 @@
 class MF_ALT
 {
 public:
-    MF_ALT(uint8_t Pin1, uint8_t Pin2);
+    MF_ALT();
     void begin();
-    void attach(uint16_t Pin3, char *init);
+    void attach();
     void detach();
     void set(int16_t messageID, char *setPoint);
     void update();

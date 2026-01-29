@@ -10,7 +10,7 @@
     "ConnectionDelay": 1250,
     "DelayAfterFirmwareUpdate": 1250,
     "DtrEnable": true,
-    "EEPROMSize": 3000,
+    "EEPROMSize": 1496,
     "ExtraConnectionRetry": false,
     "ForceResetOnFirmwareUpdate": true,
     "MessageSize": 90
@@ -46,17 +46,17 @@
   },
   "ModuleLimits": {
     "MaxAnalogInputs": 18,
-    "MaxInputShifters": 4,
+    "MaxInputShifters": 0,
     "MaxButtons": 27,
     "MaxEncoders": 20,
-    "MaxLcdI2C": 2,
-    "MaxLedSegments": 4,
+    "MaxLcdI2C": 0,
+    "MaxLedSegments": 0,
     "MaxOutputs": 27,
-    "MaxServos": 10,
-    "MaxShifters": 4,
-    "MaxSteppers": 10,
-    "MaxInputMultiplexer": 2,
-    "MaxCustomDevices": 5
+    "MaxServos": 0,
+    "MaxShifters": 0,
+    "MaxSteppers": 0,
+    "MaxInputMultiplexer": 0,
+    "MaxCustomDevices": 1
   },
  "Pins": [
     {
