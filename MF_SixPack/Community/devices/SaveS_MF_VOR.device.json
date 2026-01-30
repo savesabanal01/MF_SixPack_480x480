@@ -1,8 +1,8 @@
 {
     "$schema": "./mfdevice.schema.json",
     "Info": {
-      "Label": "Heading Indicator",
-      "Type": "MF_HI",
+      "Label": "VOR Indicator",
+      "Type": "MF_VOR",
       "Author": "SaveS",
       "URL": "https://github.com",
       "Version" : "1.0.0"
@@ -23,8 +23,23 @@
       },
            {
         "id": 1,
-        "label": "Heading Bug Value",
-        "description": "$ will be displayed as Heading Bug value"
+        "label": "VORind Value",
+        "description": "$ is the VOR Course Deviation Indicator value"
+      },
+      {
+        "id": 2,
+        "label": "GSind Value",
+        "description": "$ is the Glideslope vertical needle (up / down) value"
+      },
+      {
+        "id": 3,
+        "label": "TOFROMind Value",
+        "description": "$ ist the TO / FROM flag indicator value"
+      },
+      {
+        "id": 4,
+        "label": "NAVflag Value",
+        "description": "$ is the NAV invalid / signal warning flag value"
       },
       {
         "id": 100,
