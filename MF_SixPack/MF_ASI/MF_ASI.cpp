@@ -162,14 +162,18 @@ void MF_ASI::drawGauge()
     TASangle = scaleValue(RA_TASKnob.getAverage(), -1, 1, 15, -95);
 
 
-    whiteArcStartAngle = calculateAngle(V_S1);
-    whiteArcEndAngle = calculateAngle(V_FE);
-    greenArcStartAngle = calculateAngle(V_S0);
-    greenArcEndAngle = calculateAngle(V_NO);
-    yellowArcStartAngle = greenArcEndAngle;
-    yellowArcEndAngle = calculateAngle(V_NE);
-    V_NEArcStartAngle = yellowArcEndAngle;
-    V_NEArcEndAngle = V_NEArcStartAngle + 2;
+    whiteArcStartAngle  = calculateAngle(V_S0); // Vso
+    whiteArcEndAngle    = calculateAngle(V_FE); // Vfe
+
+    greenArcStartAngle  = calculateAngle(V_S1); // Vs1
+    greenArcEndAngle    = calculateAngle(V_NO); // Vno
+
+    yellowArcStartAngle = calculateAngle(V_NO); // Vno
+    yellowArcEndAngle   = calculateAngle(V_NE); // Vne
+
+    // Red line at Vne
+    V_NEArcStartAngle   = calculateAngle(V_NE);
+    V_NEArcEndAngle     = V_NEArcStartAngle + 2;
 
     startTIme = millis();
     canvas.fillScreen(TFT_BLACK);
@@ -242,42 +246,17 @@ void MF_ASI::drawRightGauge()
 
 float MF_ASI::calculateAngle(float airSpeed)
 {
-    float calculatedAngle;
+    // Linear mapping: 0..SCALE_MAX_KIAS -> 0..320 degrees
+    const float ANGLE_MIN = 0.0f;
+    const float ANGLE_MAX = 320.0f;
 
-    if (airSpeed < 0)
-        calculatedAngle = 0;
-    // For speeds of 0 to 40 knots
-    else if (airSpeed >= 0 and airSpeed < 40)
-        calculatedAngle = scaleValue(airSpeed, 0, 40, 0, 30);
-    // For speeds of 40 to 60 knots
-    else if (airSpeed >= 40 and airSpeed < 60)
-        calculatedAngle = scaleValue(airSpeed, 40, 60, 30, 69);
-    // For speeds of 60 to 80 knots
-    else if (airSpeed >= 60 and airSpeed < 80)
-        calculatedAngle = scaleValue(airSpeed, 60, 80, 69, 114);
-    // Between 80 and 100 knots
-    else if (airSpeed >= 80 and airSpeed < 100)
-        calculatedAngle = scaleValue(airSpeed, 80, 100, 114, 164);
-    // Between 100 and 120 knots
-    else if (airSpeed >= 100 and airSpeed < 120)
-        calculatedAngle = scaleValue(airSpeed, 100, 120, 164, 209);
-    // Between 120 an d140 knots
-    else if (airSpeed >= 120 and airSpeed < 140)
-        calculatedAngle = scaleValue(airSpeed, 120, 140, 209, 240);
-    // Between 140 and 160 knots
-    else if (airSpeed >= 140 and airSpeed < 160)
-        calculatedAngle = scaleValue(airSpeed, 140, 160, 240, 269);
-    // Between 160 and 180 knots
-    else if (airSpeed >= 160 and airSpeed < 180)
-        calculatedAngle = scaleValue(airSpeed, 160, 180, 269, 295);
-    // Between 180 and 200 knots
-    else if (airSpeed >= 180 and airSpeed < 200)
-        calculatedAngle = scaleValue(airSpeed, 180, 200, 295, 320);
-    // More than 200 knots
-    else if (airSpeed >= 200)
-        calculatedAngle = 320;
+    // Dial top-of-scale (printed max)
+    const float SCALE_MAX_KIAS = 260.0f;
 
-    return calculatedAngle;
+    if (airSpeed < 0) airSpeed = 0;
+    if (airSpeed > SCALE_MAX_KIAS) airSpeed = SCALE_MAX_KIAS;
+
+    return scaleValue(airSpeed, 0.0f, SCALE_MAX_KIAS, ANGLE_MIN, ANGLE_MAX);
 }
 
 // Setters

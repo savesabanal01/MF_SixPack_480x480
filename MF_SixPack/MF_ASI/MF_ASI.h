@@ -32,12 +32,12 @@ private:
     bool powerSaveFlag = false;
     uint8_t instrumentBrightness = 255;
 
-    // Cessna 172 Default V Speeds
+    // Default V Speeds (override via Mobiflight)
     uint16_t V_S0 = 48;
     uint16_t V_S1 = 40;
     uint16_t V_FE = 85;
     uint16_t V_NO = 129;
-    uint16_t V_NE = 163;
+    uint16_t V_NE = 220;
 
     uint16_t whiteArcStartAngle;
     uint16_t whiteArcEndAngle;
