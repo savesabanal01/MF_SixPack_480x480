@@ -6,7 +6,8 @@
 #include "RunningAverage.h"
 #include "math.h"
 
-#define BACKGROUND_COLOR  0x1041
+// #define BACKGROUND_COLOR  0x1041
+#define BACKGROUND_COLOR  TFT_BLUE
 
 #define INHG_TO_HPA 33.8639
 
@@ -15,7 +16,6 @@ static LGFX_Sprite canvas(&lcd);
 static LGFX_Sprite mainGaugeSpr(&canvas);
 static LGFX_Sprite baroInHgSpr(&canvas);
 static LGFX_Sprite baroHpaSpr(&canvas);
-static LGFX_Sprite bezelSpr(&canvas);
 static LGFX_Sprite needle100Spr(&canvas);
 static LGFX_Sprite needle1000Spr(&canvas);
 static LGFX_Sprite needle10000Spr(&canvas);
@@ -56,10 +56,10 @@ void MF_ALT::attach(uint16_t Pin3, char *init)
     lcd.setFont(&fonts::Font4);
 
     canvas.createSprite(240, 480);
-    mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Main_Gauge), ALT_MAIN_GAUGE_WIDTH, ALT_MAIN_GAUGE_HEIGHT, 16);
-    baroInHgSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Baro_InHg), ALT_BARO_INHG_WIDTH, ALT_BARO_INHG_HEIGHT, 16);
-    baroHpaSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Baro_Hpa), ALT_BARO_HPA_WIDTH, ALT_BARO_HPA_HEIGHT, 16);
-    bezelSpr.setBuffer(const_cast<std::uint16_t *>(ALT_Bezel), ALT_BEZEL_WIDTH, ALT_BEZEL_HEIGHT, 16);
+    canvas.fillSprite(TFT_BLACK);
+    mainGaugeSpr.setBuffer(const_cast<std::uint8_t *>(ALT_Main_Gauge), ALT_MAIN_GAUGE_WIDTH, ALT_MAIN_GAUGE_HEIGHT, 8);
+    baroInHgSpr.setBuffer(const_cast<std::uint8_t *>(ALT_Baro_InHg), ALT_BARO_INHG_WIDTH, ALT_BARO_INHG_HEIGHT, 8);
+    baroHpaSpr.setBuffer(const_cast<std::uint8_t *>(ALT_Baro_Hpa), ALT_BARO_HPA_WIDTH, ALT_BARO_HPA_HEIGHT, 8);
     needle100Spr.setBuffer(const_cast<std::uint16_t *>(ALT_Needle_100), ALT_NEEDLE_100_WIDTH, ALT_NEEDLE_100_HEIGHT, 16);
     needle1000Spr.setBuffer(const_cast<std::uint16_t *>(ALT_Needle_1000), ALT_NEEDLE_1000_WIDTH, ALT_NEEDLE_1000_HEIGHT, 16);
     needle10000Spr.setBuffer(const_cast<std::uint16_t *>(ALT_Needle_10000), ALT_NEEDLE_10000_WIDTH, ALT_NEEDLE_10000_HEIGHT, 16);
@@ -78,8 +78,8 @@ void MF_ALT::detach()
     _initialised = false;
     canvas.deleteSprite();
     mainGaugeSpr.deleteSprite();
-    bezelSpr.deleteSprite();
     baroInHgSpr.deleteSprite();
+    baroHpaSpr.deleteSprite();
     needle100Spr.deleteSprite();
     needle1000Spr.deleteSprite();
     needle10000Spr.deleteSprite();
@@ -178,7 +178,7 @@ void MF_ALT::drawLeftGauge()
     canvas.setPivot(240, 240);
 
     baroHpaSpr.setPivot(240, 240);
-    baroHpaSpr.pushRotated(&canvas, baroHpaAngle);
+    baroHpaSpr.pushRotated(&canvas, baroHpaAngle, BACKGROUND_COLOR);
 
     mainGaugeSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
 
@@ -191,8 +191,6 @@ void MF_ALT::drawLeftGauge()
     needle100Spr.setPivot(ALT_NEEDLE_100_WIDTH / 2, 221);
     needle100Spr.pushRotated(&canvas, needle100Angle, BACKGROUND_COLOR);
 
-    bezelSpr.pushSprite(&canvas, 0, 0, BACKGROUND_COLOR);
-
     canvas.pushSprite(&lcd, 0, 0);
 
 }
@@ -203,7 +201,7 @@ void MF_ALT::drawRightGauge()
     canvas.fillScreen(TFT_BLACK);
     canvas.setPivot(240 - x_offset, 240);
     baroInHgSpr.setPivot(240, 240);
-    baroInHgSpr.pushRotated(&canvas, baroAngle);
+    baroInHgSpr.pushRotated(&canvas, baroAngle, BACKGROUND_COLOR);
 
     mainGaugeSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
 
@@ -215,8 +213,6 @@ void MF_ALT::drawRightGauge()
 
     needle100Spr.setPivot(ALT_NEEDLE_100_WIDTH / 2, 221);
     needle100Spr.pushRotated(&canvas, needle100Angle, BACKGROUND_COLOR);
-
-    bezelSpr.pushSprite(&canvas, -x_offset, 0, BACKGROUND_COLOR);
 
     canvas.pushSprite(&lcd, x_offset, 0);
 }

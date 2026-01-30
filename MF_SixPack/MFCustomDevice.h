@@ -5,13 +5,17 @@
 #include <MF_HI/MF_HI.h>
 #include <MF_TC/MF_TC.h>
 #include <MF_ALT/MF_ALT.h>
+#include <MF_AI/MF_AI.h>
+#include <MF_VSI/MF_VSI.h>
 
 // only one entry required if you have only one custom device
 enum {
     MF_ASI_DEVICE = 1,
     MF_HI_DEVICE,
     MF_TC_DEVICE,
-    MF_ALT_DEVICE
+    MF_ALT_DEVICE,
+    MF_AI_DEVICE,
+    MF_VSI_DEVICE
 };
 class MFCustomDevice
 {
@@ -29,6 +33,8 @@ private:
     MF_HI          *_myHIdevice;
     MF_TC          *_myTCdevice;
     MF_ALT         *_myALTdevice;
+    MF_AI          *_myAIdevice;
+    MF_VSI         *_myVSIdevice;
     uint8_t        _pin1, _pin2, _pin3;
     uint8_t        _customType = 0;
 };

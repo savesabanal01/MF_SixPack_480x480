@@ -35,7 +35,9 @@
       "MF_ASI",
       "MF_HI",
       "MF_TC",
-      "MF_ALT"
+      "MF_ALT",
+      "MF_AI",
+      "MF_VSI"
     ],
     "Community": {
       "Project": "MF_SixPack",
@@ -56,7 +58,7 @@
     "MaxShifters": 4,
     "MaxSteppers": 10,
     "MaxInputMultiplexer": 2,
-    "MaxCustomDevices": 5
+    "MaxCustomDevices": 1
   },
  "Pins": [
     {

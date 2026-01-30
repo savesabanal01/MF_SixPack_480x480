@@ -3,7 +3,6 @@
 #include <Arduino.h>
 #include "include/ALT_Baro_InHg.h"
 #include "include/ALT_Baro_Hpa.h"
-#include "include/ALT_Bezel.h"
 #include "include/ALT_Main_Gauge.h"
 #include "include/ALT_Needle_100.h"
 #include "include/ALT_Needle_1000.h"

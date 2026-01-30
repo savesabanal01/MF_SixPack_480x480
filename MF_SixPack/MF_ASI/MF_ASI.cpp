@@ -12,7 +12,7 @@ static LGFX_Sprite numberTapeSpr(&canvas);
 static LGFX_Sprite labelsSpr(&canvas);
 static LGFX_Sprite needleSpr(&canvas);
 
-#define BACKGROUND_COLOR  0x1041
+#define BACKGROUND_COLOR  TFT_BLUE
 
 RunningAverage RA_Airspeed(5);
 RunningAverage RA_TASKnob(5);
@@ -45,12 +45,12 @@ void MF_ASI::attach(uint16_t Pin3, char *init)
 
     lcd.fillScreen(TFT_BLACK);
     lcd.setFont(&fonts::Font4);
-    lcd.fillScreen(BACKGROUND_COLOR);
 
     canvas.createSprite(240, 480);
+    canvas.fillSprite(TFT_BLACK);
     mainGaugeSpr.setBuffer(const_cast<std::uint16_t *>(ASI_Main_Gauge), ASI_MAIN_GAUGE_WIDTH, ASI_MAIN_GAUGE_HEIGHT, 16);
-    numberTapeSpr.setBuffer(const_cast<std::uint16_t *>(ASI_Number_Tape), ASI_NUMBER_TAPE_WIDTH, ASI_NUMBER_TAPE_HEIGHT, 16);
-    labelsSpr.setBuffer(const_cast<std::uint16_t *>(ASI_Labels), ASI_LABELS_WIDTH, ASI_LABELS_HEIGHT, 16);
+    numberTapeSpr.setBuffer(const_cast<std::uint8_t *>(ASI_Number_Tape), ASI_NUMBER_TAPE_WIDTH, ASI_NUMBER_TAPE_HEIGHT, 8);
+    labelsSpr.setBuffer(const_cast<std::uint8_t *>(ASI_Labels), ASI_LABELS_WIDTH, ASI_LABELS_HEIGHT, 8);
     needleSpr.setBuffer(const_cast<std::uint16_t *>(ASI_Needle), ASI_NEEDLE_WIDTH, ASI_NEEDLE_HEIGHT, 16);
 
     RA_Airspeed.clear();
@@ -183,6 +183,7 @@ void MF_ASI::drawLeftGauge()
 {
 
     canvas.setPivot(240, 240);
+    canvas.fillSprite(TFT_BLACK);
     needleSpr.setPivot(ASI_NEEDLE_WIDTH / 2, 240);
 
     // Draw left half
