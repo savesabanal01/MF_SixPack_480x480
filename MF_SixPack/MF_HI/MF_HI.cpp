@@ -19,7 +19,7 @@ runningAngle RA_HeadingBug(runningAngle::DEGREES);
 // RunningAverage RA_Heading(5);
 // RunningAverage RA_HeadingBug(5);
 
-int HIMessageID = -1;
+int HIMessageID = -100;
 
 /* **********************************************************************************
     This is just the basic code to set up your custom device.

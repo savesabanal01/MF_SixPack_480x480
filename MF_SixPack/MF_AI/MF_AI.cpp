@@ -15,7 +15,7 @@ static LGFX_Sprite bezelSpr(&canvas);
 static LGFX_Sprite rollIndicatorSpr(&canvas);
 static LGFX_Sprite pitchIndicatorSpr(&canvas);
 
-int AIMessageID = -1;
+int AIMessageID = -100;
 
 RunningAverage RA_Pitch(5);
 RunningAverage RA_Roll(5);

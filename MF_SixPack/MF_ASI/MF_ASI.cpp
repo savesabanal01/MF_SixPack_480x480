@@ -17,7 +17,7 @@ static LGFX_Sprite needleSpr(&canvas);
 RunningAverage RA_Airspeed(5);
 RunningAverage RA_TASKnob(5);
 
-int ASIMessageID = -1;
+int ASIMessageID = -100;
 
 /* **********************************************************************************
     This is just the basic code to set up your custom device.

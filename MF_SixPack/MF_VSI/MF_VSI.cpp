@@ -15,7 +15,7 @@ static LGFX_Sprite bezelSpr(&canvas);
 static LGFX_Sprite needleSpr(&canvas);
 
 RunningAverage RA_VSIAngle(5);
-int VSIMessageID = -1;
+int VSIMessageID = -100;
 
 /* **********************************************************************************
     This is just the basic code to set up your custom device.

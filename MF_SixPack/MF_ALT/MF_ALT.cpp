@@ -20,7 +20,7 @@ static LGFX_Sprite needle100Spr(&canvas);
 static LGFX_Sprite needle1000Spr(&canvas);
 static LGFX_Sprite needle10000Spr(&canvas);
 
-int ALTMessageID = -1;
+int ALTMessageID = -100;
 
 RunningAverage RA_Altitude(5);
 RunningAverage RA_Baro(5);
@@ -51,9 +51,10 @@ void MF_ALT::attach(uint16_t Pin3, char *init)
 
     lcd.setRotation(3);
 
-    lcd.fillScreen(TFT_BLACK);
+    lcd.fillScreen(TFT_GREEN);
     delay(1000);
     lcd.setFont(&fonts::Font4);
+    lcd.fillScreen(TFT_BLACK);
 
     canvas.createSprite(240, 480);
     canvas.fillSprite(TFT_BLACK);

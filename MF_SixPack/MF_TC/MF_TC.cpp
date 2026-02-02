@@ -19,7 +19,7 @@ static LGFX_Sprite bezelSpr(&canvas);
 RunningAverage RA_TurnAngle(5);
 RunningAverage RA_SlipAngle(5);
 
-int TCMessageID = -1;
+int TCMessageID = -100;
 
 /* **********************************************************************************
     This is just the basic code to set up your custom device.
