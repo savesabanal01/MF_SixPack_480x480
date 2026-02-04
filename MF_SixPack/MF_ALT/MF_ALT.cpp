@@ -51,10 +51,9 @@ void MF_ALT::attach(uint16_t Pin3, char *init)
 
     lcd.setRotation(3);
 
-    lcd.fillScreen(TFT_GREEN);
+    lcd.fillScreen(TFT_BLACK);
     delay(1000);
     lcd.setFont(&fonts::Font4);
-    lcd.fillScreen(TFT_BLACK);
 
     canvas.createSprite(240, 480);
     canvas.fillSprite(TFT_BLACK);
